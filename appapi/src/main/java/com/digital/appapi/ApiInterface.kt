@@ -1,0 +1,56 @@
+package com.jisr.ess.http
+
+import io.reactivex.Observable
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
+import retrofit2.Response
+import retrofit2.http.*
+import java.lang.StringBuilder
+import retrofit2.http.Url
+import retrofit2.http.GET
+
+
+
+interface ApiInterface {
+
+    @GET
+    fun get(@Url endPoint:String ,
+            @QueryMap params:Map<String,Any>,
+            @HeaderMap headerMap:Map<String,String> = mapOf()) : Observable<Response<ResponseBody>>
+
+
+
+    @PUT
+    fun put(@Url endPoint:String,
+            @Body body:Any,
+            @QueryMap qParams:Map<String,String> = mapOf(),
+            @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
+
+
+    @POST
+    fun post(@Url endPoint:String,
+             @Body body:Any,
+             @QueryMap qParams:Map<String,String> = mapOf(),
+             @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
+
+
+    @Multipart
+    @POST
+    fun postMultiPart(@Url endPoint:String
+                      , @PartMap partMap:Map<String,@JvmSuppressWildcards RequestBody>
+                      , @Part files:List<MultipartBody.Part>
+                      , @PartMap params:HashMap<String,Any> = hashMapOf()
+                      , @QueryMap qParams:HashMap<String,String> = hashMapOf()
+                      , @HeaderMap headerMap:Map<String,String> = mapOf()) : Observable<Response<ResponseBody>>
+
+
+
+
+
+
+
+    @GET
+    fun downloadFileUrlSync(@Url fileUrl: String): Observable<Response<ResponseBody>>
+
+}
