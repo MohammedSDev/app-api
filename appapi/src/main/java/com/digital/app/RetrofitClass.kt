@@ -1,8 +1,7 @@
-package com.digital.appapi
+package com.digital.app
 
-import com.digital.appapi.config.Constants
+import com.digital.app.config.Constants
 import com.google.gson.*
-import com.google.gson.reflect.TypeToken
 import com.jisr.ess.http.ApiInterface
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -12,7 +11,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Converter
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import java.lang.reflect.Type
-import java.util.concurrent.TimeUnit
 
 //GsonBuilder().registerTypeAdapter(type,CustomDGson::class.java).create()
 

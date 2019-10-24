@@ -16,7 +16,7 @@ interface ApiInterface {
 
     @GET
     fun get(@Url endPoint:String ,
-            @QueryMap params:Map<String,Any>,
+            @QueryMap params:Map<String,@JvmSuppressWildcards Any>,
             @HeaderMap headerMap:Map<String,String> = mapOf()) : Observable<Response<ResponseBody>>
 
 
@@ -24,15 +24,22 @@ interface ApiInterface {
     @PUT
     fun put(@Url endPoint:String,
             @Body body:Any,
-            @QueryMap qParams:Map<String,String> = mapOf(),
+            @QueryMap qParams:Map<String,@JvmSuppressWildcards Any> = mapOf(),
             @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
 
 
     @POST
     fun post(@Url endPoint:String,
              @Body body:Any,
-             @QueryMap qParams:Map<String,String> = mapOf(),
+             @QueryMap qParams:Map<String,@JvmSuppressWildcards Any> = mapOf(),
              @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
+
+
+    @DELETE
+    fun delete(@Url endPoint:String,
+            @Body body:Any,
+            @QueryMap qParams:Map<String,@JvmSuppressWildcards Any> = mapOf(),
+            @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
 
 
     @Multipart
@@ -40,7 +47,7 @@ interface ApiInterface {
     fun postMultiPart(@Url endPoint:String
                       , @PartMap partMap:Map<String,@JvmSuppressWildcards RequestBody>
                       , @Part files:List<MultipartBody.Part>
-                      , @PartMap params:HashMap<String,Any> = hashMapOf()
+                      , @PartMap params:HashMap<String,@JvmSuppressWildcards Any> = hashMapOf()
                       , @QueryMap qParams:HashMap<String,String> = hashMapOf()
                       , @HeaderMap headerMap:Map<String,String> = mapOf()) : Observable<Response<ResponseBody>>
 
