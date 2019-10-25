@@ -1,10 +1,13 @@
 package com.digital.app.api
 
+import android.util.Log
 import com.digital.app.*
 import com.digital.app.config.Constants
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import okhttp3.ResponseBody
+import java.io.*
 import java.util.concurrent.TimeUnit
 
 enum class AppMethod {
@@ -79,5 +82,87 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
         }
 
     }
+
+    fun download(file:File): Disposable {
+
+        with(appRequest) {
+
+
+
+            var ob2 = RetrofitObject.retrofit.downloadFileUrlSync(endPoint, headerParam)
+                .delay(delay, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.computation())
+
+            if (observeOnMainThread ?: Constants.OBSERVER_ON_MAIN_THREAD) {
+                ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
+            }
+            val dis = ob2.subscribe({
+                writeResponseBodyToDisk(it,file)
+                onSuccess?.invoke(ResponseModel())
+            }, {err->
+                onError?.invoke(ErrorResponseModel().also { it.errorMessage = err.message ?: err.localizedMessage })
+            }, {})
+            disposable = dis
+            return dis
+        }
+
+    }
+
+
+
+
+
+    private fun writeResponseBodyToDisk(body: ResponseBody, file:File): Boolean  {
+        try {
+            // todo change the file location/name according to your needs
+            var inputStream: InputStream? = null
+            var outputStream: OutputStream? = null
+
+            try {
+                val fileReader = ByteArray(4096)
+
+                val fileSize = body.contentLength()
+                var fileSizeDownloaded: Long = 0
+
+                inputStream = body.byteStream()
+                outputStream = FileOutputStream(file)
+
+                while (true) {
+                    val read = inputStream!!.read(fileReader)
+
+                    if (read == -1) {
+                        break
+                    }
+
+                    outputStream!!.write(fileReader, 0, read)
+
+                    fileSizeDownloaded += read.toLong()
+
+                    Log.d("mud", "file download: $fileSizeDownloaded of $fileSize")
+                }
+
+                outputStream!!.flush()
+
+                return true
+            } catch (e: IOException) {
+//                return false
+                throw e
+            } finally {
+                if (inputStream != null) {
+                    inputStream!!.close()
+                }
+
+                if (outputStream != null) {
+                    outputStream!!.close()
+                }
+            }
+        } catch (e: IOException) {
+            //return false
+            throw e
+        }
+
+    }
+
+
 
 }

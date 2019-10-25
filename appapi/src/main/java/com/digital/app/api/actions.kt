@@ -1,5 +1,9 @@
 package com.digital.app.api
 
+import com.digital.app.ErrorResponseModel
+import com.digital.app.ResponseModel
+import java.io.File
+
 fun post(endPoint:String): AppFunctions {
     val appReq = AppRequest(endPoint)
 
@@ -53,4 +57,14 @@ inline fun <reified A : AppFunctions>delete(): A {
     val instance2 = A::class.java.getConstructor(AppMethod::class.java,AppRequest::class.java)
         .newInstance(AppMethod.DELETE,appReq)
     return instance2
+}
+
+
+
+fun download(file:File,appRequest:AppRequest,onSuccess:(r:ResponseModel)->Unit,onError:(r:ErrorResponseModel)->Unit) {
+
+     AppFunctions(AppMethod.GET,appRequest)
+         .onSuccess(onSuccess)
+         .onError(onError)
+         .download(file)
 }

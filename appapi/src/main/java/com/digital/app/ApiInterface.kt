@@ -11,53 +11,59 @@ import retrofit2.http.Url
 import retrofit2.http.GET
 
 
-
 interface ApiInterface {
 
     @GET
-    fun get(@Url endPoint:String ,
-            @QueryMap params:Map<String,@JvmSuppressWildcards Any>,
-            @HeaderMap headerMap:Map<String,String> = mapOf()) : Observable<Response<ResponseBody>>
-
+    fun get(
+        @Url endPoint: String,
+        @QueryMap params: Map<String, @JvmSuppressWildcards Any>,
+        @HeaderMap headerMap: Map<String, String> = mapOf()
+    ): Observable<Response<ResponseBody>>
 
 
     @PUT
-    fun put(@Url endPoint:String,
-            @Body body:Any,
-            @QueryMap qParams:Map<String,@JvmSuppressWildcards Any> = mapOf(),
-            @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
+    fun put(
+        @Url endPoint: String,
+        @Body body: Any,
+        @QueryMap qParams: Map<String, @JvmSuppressWildcards Any> = mapOf(),
+        @HeaderMap headerMap: Map<String, String> = mapOf()
+    ): Observable<Response<ResponseBody>>
 
 
     @POST
-    fun post(@Url endPoint:String,
-             @Body body:Any,
-             @QueryMap qParams:Map<String,@JvmSuppressWildcards Any> = mapOf(),
-             @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
+    fun post(
+        @Url endPoint: String,
+        @Body body: Any,
+        @QueryMap qParams: Map<String, @JvmSuppressWildcards Any> = mapOf(),
+        @HeaderMap headerMap: Map<String, String> = mapOf()
+    ): Observable<Response<ResponseBody>>
 
 
     @DELETE
-    fun delete(@Url endPoint:String,
-            @Body body:Any,
-            @QueryMap qParams:Map<String,@JvmSuppressWildcards Any> = mapOf(),
-            @HeaderMap headerMap:Map<String,String> = mapOf() ) : Observable<Response<ResponseBody>>
+    fun delete(
+        @Url endPoint: String,
+        @Body body: Any,
+        @QueryMap qParams: Map<String, @JvmSuppressWildcards Any> = mapOf(),
+        @HeaderMap headerMap: Map<String, String> = mapOf()
+    ): Observable<Response<ResponseBody>>
 
 
     @Multipart
     @POST
-    fun postMultiPart(@Url endPoint:String
-                      , @PartMap partMap:Map<String,@JvmSuppressWildcards RequestBody>
-                      , @Part files:List<MultipartBody.Part>
-                      , @PartMap params:HashMap<String,@JvmSuppressWildcards Any> = hashMapOf()
-                      , @QueryMap qParams:HashMap<String,String> = hashMapOf()
-                      , @HeaderMap headerMap:Map<String,String> = mapOf()) : Observable<Response<ResponseBody>>
-
-
-
-
-
+    fun postMultiPart(
+        @Url endPoint: String
+        , @PartMap partMap: Map<String, @JvmSuppressWildcards RequestBody>
+        , @Part files: List<MultipartBody.Part>
+        , @PartMap params: HashMap<String, @JvmSuppressWildcards Any> = hashMapOf()
+        , @QueryMap qParams: HashMap<String, String> = hashMapOf()
+        , @HeaderMap headerMap: Map<String, String> = mapOf()
+    ): Observable<Response<ResponseBody>>
 
 
     @GET
-    fun downloadFileUrlSync(@Url fileUrl: String): Observable<Response<ResponseBody>>
+    fun downloadFileUrlSync(
+        @Url fileUrl: String
+        , @HeaderMap headerMap: Map<String, String> = mapOf()
+    ): Observable<ResponseBody>
 
 }
