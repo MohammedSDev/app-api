@@ -1,11 +1,15 @@
 package com.digital.app.api
 
 import android.util.Log
+import android.webkit.MimeTypeMap
 import com.digital.app.*
 import com.digital.app.config.Constants
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import java.io.*
 import java.util.concurrent.TimeUnit
@@ -46,21 +50,50 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
 
     inline fun <reified R : ResponseModel, reified E : ErrorResponseModel> call(): Disposable {
 
+
         with(appRequest) {
 
             val apiService = RetrofitObject.retrofit
-            val ob = when (method) {
-                AppMethod.POST -> {
-                    apiService.post(endPoint, bodyParam, queryParam, headerParam)
+            val ob = if (isMultiPart) {
+                if(bodyParam.isNotEmpty() && multiBodyParam.isEmpty()){
+                    throw Throwable("use `multiBodyParam` instead of `bodyParam` with multiPart request ")
                 }
-                AppMethod.PUT -> {
-                    apiService.put(endPoint, bodyParam, queryParam, headerParam)
+                val multiPFilesList: MutableList<MultipartBody.Part> = mutableListOf()
+                multiPartFiles?.forEach {fileModel->
+                    if(fileModel.file.exists()){
+                        multiPFilesList.add(prepareFileToMultiPart(fileModel.fileName,fileModel.file,fileModel.mediaType))
+                    }else{
+                        //log(text = "${fileModel.fileName} file :${fileModel.file.absolutePath} not exist.skip it")
+                    }
                 }
-                AppMethod.GET -> {
-                    apiService.get(endPoint, queryParam, headerParam)
+                when (method) {
+                    AppMethod.POST -> {
+                        apiService.postMultiPart(endPoint, multiBodyParam, multiPFilesList, queryParam, headerParam)
+                    }
+                    AppMethod.PUT -> {
+                        apiService.putMultiPart(endPoint, multiBodyParam, multiPFilesList, queryParam, headerParam)
+                    }
+                    AppMethod.GET -> {
+                        throw Throwable("AppApi not support multipart request with GET method.")
+                    }
+                    AppMethod.DELETE -> {
+                        throw Throwable("AppApi not support multipart request with DELETE method.")
+                    }
                 }
-                AppMethod.DELETE -> {
-                    apiService.delete(endPoint, bodyParam, queryParam, headerParam)
+            } else {
+                when (method) {
+                    AppMethod.POST -> {
+                        apiService.post(endPoint, bodyParam, queryParam, headerParam)
+                    }
+                    AppMethod.PUT -> {
+                        apiService.put(endPoint, bodyParam, queryParam, headerParam)
+                    }
+                    AppMethod.GET -> {
+                        apiService.get(endPoint, queryParam, headerParam)
+                    }
+                    AppMethod.DELETE -> {
+                        apiService.delete(endPoint, bodyParam, queryParam, headerParam)
+                    }
                 }
             }
             var ob2 = ob
@@ -83,10 +116,9 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
 
     }
 
-    fun download(file:File): Disposable {
+    fun download(file: File): Disposable {
 
         with(appRequest) {
-
 
 
             var ob2 = RetrofitObject.retrofit.downloadFileUrlSync(endPoint, headerParam)
@@ -97,9 +129,9 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
             val dis = ob2.subscribe({
-                writeResponseBodyToDisk(it,file)
+                writeResponseBodyToDisk(it, file)
                 onSuccess?.invoke(ResponseModel())
-            }, {err->
+            }, { err ->
                 onError?.invoke(ErrorResponseModel().also { it.errorMessage = err.message ?: err.localizedMessage })
             }, {})
             disposable = dis
@@ -109,10 +141,7 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
     }
 
 
-
-
-
-    private fun writeResponseBodyToDisk(body: ResponseBody, file:File): Boolean  {
+    private fun writeResponseBodyToDisk(body: ResponseBody, file: File): Boolean {
         try {
             // todo change the file location/name according to your needs
             var inputStream: InputStream? = null
@@ -165,4 +194,48 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
 
 
 
+
+    fun prepareFileToMultiPart(partName: String, file: File, mediaType: String): MultipartBody.Part {
+
+//    val mediaType = MediaType.parse(getContentResolver().getType(fileUri))
+        // create RequestBody instance from file
+        val requestFile = RequestBody.create(
+            MediaType.parse(mediaType),
+            file
+        )
+
+        // MultipartBody.Part is used to send also the actual file name
+        return MultipartBody.Part.createFormData(partName, file.name, requestFile)
+    }
+
+
+    //don't use this. use `getMimeType` fun.
+    private fun getExtensionMimeType(path: String): String? {
+        val extention = path.substring(path.lastIndexOf("."));
+        val mimeTypeMap = MimeTypeMap.getFileExtensionFromUrl(extention)
+        val mimeType = MimeTypeMap.getSingleton()
+            .getMimeTypeFromExtension(mimeTypeMap)
+        return mimeType
+    }
+
+
+
+
+
+}
+
+fun createRequestPart(value: String): RequestBody {
+    return RequestBody.create(
+        okhttp3.MultipartBody.FORM, value
+    )
+}
+
+// url = file path or whatever suitable URL you want.
+fun getMimeType(url: String): String? {
+    var type: String? = null
+    val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+    if (extension != null) {
+        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+    }
+    return type
 }
