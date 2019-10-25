@@ -3,7 +3,7 @@ package com.digital.app
 /*
 
 import android.util.Log
-import com.digital.app.config.Constants
+import com.digital.app.appConfig.Constants
 import okhttp3.MediaType
 import okhttp3.ResponseBody
 import java.io.IOException

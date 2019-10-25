@@ -11,8 +11,6 @@ import java.net.UnknownHostException
 
 
 inline fun <reified T : ResponseModel,reified E:ErrorResponseModel> handleDataPacing2(response: retrofit2.Response<ResponseBody>): T {
-    println("---------------------------------------------------parcing2OnAPpFunction")
-    println("response.isSuccessful:${response.isSuccessful}")
 
     if (response.isSuccessful) {
         //success response
@@ -26,40 +24,12 @@ inline fun <reified T : ResponseModel,reified E:ErrorResponseModel> handleDataPa
                     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
             appApiLog(text)
             val error = ErrorResponseModel().apply {
-                errorMessage = "Some thing went wrong. try later"
+                errorCode = Constants.RESPONSE_EMPTY_ERROR_CODE
+                errorMessage = Constants.GENERAL_ERROR_MESSAGE
             }
-            throw RetrofitThrowable(error, error.errorMessage.toString())
+            throw RetrofitThrowable(error, error.errorMessage)
         }
     } else {
-//        val errorTT:Any?
-//        val body11 = response.errorBody()
-//        if (body11 == null)
-//        {
-//            println("body null")
-//        }
-//
-//        val converter22 = RetrofitObject
-//            .retrofitBodyConverter<T>(T::class.java, arrayOfNulls<Annotation>(0))
-//        try {
-//            errorTT = converter22.convert(body11)
-//        } catch (ex: IOException) {
-//            throw ex
-//
-//        }
-//        val error11 = converter<Er>(response.errorBody())
-//        val error22 = converter<E>(response.errorBody())
-//        val error33 = converter<ErrorResponseModel>(response.errorBody())
-        println(".")
-        println(".")
-        println(".")
-        println(".")
-        println(".")
-        println(".")
-        println("---------------------------------------------------parcing2OnAPpFunction")
-        println(E::class.java.newInstance())
-        println(E::class.java.newInstance())
-        println(E::class.java.newInstance().errorMessage)
-//        throw RetrofitThrowable(ErrorResponseModel(),"empty")
         throw failedResponseParcing2<E>(response)
 
     }
@@ -67,16 +37,15 @@ inline fun <reified T : ResponseModel,reified E:ErrorResponseModel> handleDataPa
 inline fun <reified E : ErrorResponseModel>failedResponseParcing2(response: Response<ResponseBody>): RetrofitThrowable {
     //failed response
     val error = converter<E>(response.errorBody())
-//        val error =  converter<T>(response.errorBody())
+
     if (error != null)
-        return RetrofitThrowable(error, error.errorMessage.toString())
+        return RetrofitThrowable(error, error.errorMessage)
     else {
         val errorResponse = ErrorResponseModel().apply {
-            //            success = false
-            errorMessage = "Some Thing Went wrong"
-//                statusCode = error?.statusCode
+            errorCode = Constants.ERROR_RESPONSE_EMPTY_ERROR_CODE
+            errorMessage = Constants.GENERAL_ERROR_MESSAGE
         }
-        return RetrofitThrowable(errorResponse, errorResponse.errorMessage.toString())
+        return RetrofitThrowable(errorResponse, errorResponse.errorMessage)
     }
 }
 
@@ -103,25 +72,23 @@ fun errorsHandling(throwable: Throwable): ErrorResponseModel {
     appApiLog(text = "errorsHandling, message + ${throwable.message}")
 
 
-    // if
+
     if (throwable is ConnectException) {
         error = ErrorResponseModel().apply {
             errorCode = Constants.CONNECT_ERROR_CODE
-//            message = "Opps.Kindly check your Connection"
-            /*messageRes = R.string.kindly_check_your_connection*/
+            errorMessage = Constants.CONNECT_ERROR_MESSAGE
         }
     }
     else if (throwable is SocketTimeoutException) {
         error = ErrorResponseModel().apply {
-            errorCode = Constants.CONNECT_ERROR_CODE
-//            message = "Opps.Kindly check your Connection"
-            /*messageRes = R.string.kindly_check_your_connection*/
+            errorCode = Constants.CONNECT_TIME_OUT_ERROR_CODE
+            errorMessage = Constants.CONNECT_TIME_OUT_ERROR_MESSAGE
         }
     }
     else if (throwable is UnknownHostException) {
         error = ErrorResponseModel().apply {
-            errorCode = Constants.CONNECT_ERROR_CODE
-            /*messageRes = R.string.kindly_check_your_connection*/
+            errorCode = Constants.CONNECT_ADDRESS_ERROR_CODE
+            errorMessage = Constants.CONNECT_ADDRESS_ERROR_MESSAGE
         }
     }
     else if (throwable is RetrofitThrowable)
@@ -134,12 +101,9 @@ fun errorsHandling(throwable: Throwable): ErrorResponseModel {
                 "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         appApiLog(text = text)
         error = ErrorResponseModel().apply {
-//            message = "Some thing went wrong. try later"
-            /*messageRes = R.string.some_thing_went_wrong*/
+            errorMessage = Constants.GENERAL_ERROR_MESSAGE
         }
     }
-
-//    error.success = false
     return error
 }
 

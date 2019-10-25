@@ -38,7 +38,7 @@ object RetrofitObject {
         .baseUrl(Constants.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create(customGson))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .client(httpClient.build())
+        .client(Constants.OK_HTTP_CLIENT ?: httpClient.build())
         .build()
 
 

@@ -1,46 +1,23 @@
 package com.digital.app.api
 
-import com.digital.app.ErrorResponseModel
-import com.digital.app.LoginModel
-import com.digital.app.RetrofitObject
-
-fun test(){
-    val p = hashMapOf<String,Any>()
-    RetrofitObject.retrofit
-    post("users")
-        .preRequest {
-            queryParam = p
-            delay = 2000L
-        }
-        .onSuccess {  }
-        .onError {  }
-        .call<LoginModel,ErrorResponseModel>()
-
-
-}
-
-
 fun post(endPoint:String): AppFunctions {
     val appReq = AppRequest(endPoint)
 
     return AppFunctions(AppMethod.POST,appReq)
 
 }
-
 fun put(endPoint:String): AppFunctions {
     val appReq = AppRequest(endPoint)
 
     return AppFunctions(AppMethod.PUT,appReq)
 
 }
-
 fun get(endPoint:String): AppFunctions {
     val appReq = AppRequest(endPoint)
 
     return AppFunctions(AppMethod.GET,appReq)
 
 }
-
 fun delete(endPoint:String): AppFunctions {
     val appReq = AppRequest(endPoint)
 
@@ -50,3 +27,30 @@ fun delete(endPoint:String): AppFunctions {
 
 
 
+inline fun <reified A : AppFunctions>post(): A {
+    val appReq = AppRequest("")
+
+//    val instance = A::class.java.getDeclaredConstructor(A::class.java)
+//        .newInstance()
+    val instance2 = A::class.java.getConstructor(AppMethod::class.java,AppRequest::class.java)
+        .newInstance(AppMethod.POST,appReq)
+    return instance2
+}
+inline fun <reified A : AppFunctions>get(): A {
+    val appReq = AppRequest("")
+    val instance2 = A::class.java.getConstructor(AppMethod::class.java,AppRequest::class.java)
+        .newInstance(AppMethod.GET,appReq)
+    return instance2
+}
+inline fun <reified A : AppFunctions>put(): A {
+    val appReq = AppRequest("")
+    val instance2 = A::class.java.getConstructor(AppMethod::class.java,AppRequest::class.java)
+        .newInstance(AppMethod.PUT,appReq)
+    return instance2
+}
+inline fun <reified A : AppFunctions>delete(): A {
+    val appReq = AppRequest("")
+    val instance2 = A::class.java.getConstructor(AppMethod::class.java,AppRequest::class.java)
+        .newInstance(AppMethod.DELETE,appReq)
+    return instance2
+}
