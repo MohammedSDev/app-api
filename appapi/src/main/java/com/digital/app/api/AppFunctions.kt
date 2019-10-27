@@ -1,6 +1,5 @@
 package com.digital.app.api
 
-import android.util.Log
 import android.webkit.MimeTypeMap
 import com.digital.app.*
 import com.digital.app.config.Constants
@@ -68,10 +67,10 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                 }
                 when (method) {
                     AppMethod.POST -> {
-                        apiService.postMultiPart(endPoint, multiBodyParam, multiPFilesList, queryParam, headerParam)
+                        apiService.postMultiPart(url, multiBodyParam, multiPFilesList, queryParam, headerParam)
                     }
                     AppMethod.PUT -> {
-                        apiService.putMultiPart(endPoint, multiBodyParam, multiPFilesList, queryParam, headerParam)
+                        apiService.putMultiPart(url, multiBodyParam, multiPFilesList, queryParam, headerParam)
                     }
                     AppMethod.GET -> {
                         throw Throwable("AppApi not support multipart request with GET method.")
@@ -83,16 +82,16 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
             } else {
                 when (method) {
                     AppMethod.POST -> {
-                        apiService.post(endPoint, bodyParam, queryParam, headerParam)
+                        apiService.post(url, bodyParam, queryParam, headerParam)
                     }
                     AppMethod.PUT -> {
-                        apiService.put(endPoint, bodyParam, queryParam, headerParam)
+                        apiService.put(url, bodyParam, queryParam, headerParam)
                     }
                     AppMethod.GET -> {
-                        apiService.get(endPoint, queryParam, headerParam)
+                        apiService.get(url, queryParam, headerParam)
                     }
                     AppMethod.DELETE -> {
-                        apiService.delete(endPoint, bodyParam, queryParam, headerParam)
+                        apiService.delete(url, bodyParam, queryParam, headerParam)
                     }
                 }
             }
@@ -121,7 +120,7 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
         with(appRequest) {
 
 
-            var ob2 = RetrofitObject.retrofit.downloadFileUrlSync(endPoint, headerParam)
+            var ob2 = RetrofitObject.retrofit.downloadFileUrlSync(url, headerParam)
                 .delay(delay, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.computation())
 
@@ -129,6 +128,7 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
             val dis = ob2.subscribe({
+//                println("file connected, start write to disk. ... .")
                 writeResponseBodyToDisk(it, file)
                 onSuccess?.invoke(ResponseModel())
             }, { err ->
@@ -167,7 +167,7 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
 
                     fileSizeDownloaded += read.toLong()
 
-                    Log.d("mud", "file download: $fileSizeDownloaded of $fileSize")
+//                    Log.d("mud", "file download: $fileSizeDownloaded of $fileSize")
                 }
 
                 outputStream!!.flush()
