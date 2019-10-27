@@ -60,9 +60,9 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                 val multiPFilesList: MutableList<MultipartBody.Part> = mutableListOf()
                 multiPartFiles?.forEach {fileModel->
                     if(fileModel.file.exists()){
-                        multiPFilesList.add(prepareFileToMultiPart(fileModel.fileName,fileModel.file,fileModel.mediaType))
+                        multiPFilesList.add(prepareFileToMultiPart(fileModel.fileKeyName,fileModel.file,fileModel.mediaType))
                     }else{
-                        //log(text = "${fileModel.fileName} file :${fileModel.file.absolutePath} not exist.skip it")
+                        //log(text = "${fileModel.fileKeyName} file :${fileModel.file.absolutePath} not exist.skip it")
                     }
                 }
                 when (method) {
