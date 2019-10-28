@@ -10,13 +10,13 @@ import java.nio.file.Files
  * container of request params & options
  * */
 class AppRequest(var url: String){
-    var headerParam: HashMap<String,String> = hashMapOf()
-    var queryParam: HashMap<String,Any> = hashMapOf()
-    var bodyParam: HashMap<String,Any> = hashMapOf()
+    var headerParam: Map<String,String> = hashMapOf()
+    var queryParam: Map<String,Any> = hashMapOf()
+    var bodyParam: Map<String,Any> = hashMapOf()
     var delay: Long = 0//ms
     var observeOnMainThread: Boolean? = null
     var isMultiPart: Boolean = false
     var multiPartFiles: List<AppUploadableFile>? = null
-    var multiBodyParam: HashMap<String,RequestBody> = hashMapOf()
+    var multiBodyParam: Map<String,RequestBody> = hashMapOf()
 
 }

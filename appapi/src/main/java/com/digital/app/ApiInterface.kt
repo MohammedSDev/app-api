@@ -52,9 +52,9 @@ interface ApiInterface {
     @POST
     fun postMultiPart(
         @Url endPoint: String
-        , @PartMap params: HashMap<String, @JvmSuppressWildcards RequestBody> = hashMapOf()
+        , @PartMap params: Map<String, @JvmSuppressWildcards RequestBody> = hashMapOf()
         , @Part files: List<MultipartBody.Part>
-        , @QueryMap qParams: HashMap<String,@JvmSuppressWildcards  Any> = hashMapOf()
+        , @QueryMap qParams: Map<String,@JvmSuppressWildcards  Any> = hashMapOf()
         , @HeaderMap headerMap: Map<String, String> = mapOf()
     ): Observable<Response<ResponseBody>>
 
@@ -63,9 +63,9 @@ interface ApiInterface {
     @PUT
     fun putMultiPart(
         @Url endPoint: String
-        , @PartMap params: HashMap<String, @JvmSuppressWildcards RequestBody> = hashMapOf()
+        , @PartMap params: Map<String, @JvmSuppressWildcards RequestBody> = hashMapOf()
         , @Part files: List<MultipartBody.Part>
-        , @QueryMap qParams: HashMap<String,@JvmSuppressWildcards  Any> = hashMapOf()
+        , @QueryMap qParams: Map<String,@JvmSuppressWildcards  Any> = hashMapOf()
         , @HeaderMap headerMap: Map<String, String> = mapOf()
     ): Observable<Response<ResponseBody>>
 
