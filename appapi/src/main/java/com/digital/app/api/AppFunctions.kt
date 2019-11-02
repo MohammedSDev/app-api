@@ -26,6 +26,8 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
         protected set
     var disposable: Disposable? = null
 
+    var networkStatus: ((status:AppNetworkStatus)->Unit)? = null
+        protected set
 
     fun preRequest(block: AppRequest.() -> Unit): AppFunctions {
         block(appRequest)
@@ -39,6 +41,11 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
 
     open fun onError(block: (response: ErrorResponseModel) -> Unit): AppFunctions {
         onError = block
+        return this
+    }
+
+    open fun onStatusChange(block: (status: AppNetworkStatus) -> Unit): AppFunctions {
+        networkStatus = block
         return this
     }
 
@@ -97,6 +104,9 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
             }
             var ob2 = ob
                 .delay(delay, TimeUnit.MILLISECONDS)
+                .doOnSubscribe {
+                    networkStatus?.invoke(AppNetworkStatus.InProgress)
+                }
                 .subscribeOn(Schedulers.computation())
                 .map {
                     handleDataPacing2<R, E>(it)
@@ -106,8 +116,10 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
             }
             val dis = ob2.subscribe({
                 onSuccess?.invoke(it)
+                networkStatus?.invoke(AppNetworkStatus.OnSuccess)
             }, {
                 onError?.invoke(errorsHandling(it))
+                networkStatus?.invoke(AppNetworkStatus.OnError)
             }, {})
             disposable = dis
             return dis
