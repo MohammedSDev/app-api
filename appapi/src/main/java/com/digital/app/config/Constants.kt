@@ -7,7 +7,8 @@ import java.util.concurrent.TimeUnit
 
 
  object Constants {
-    var OK_HTTP_CLIENT:OkHttpClient? = null
+    var OK_HTTP_CLIENT:OkHttpClient.Builder? = null
+    var OK_HTTP_CLIENT_KEEP_PURE:Boolean = false
     var BASE_URL = ""
     var TIMEOUT_UNIT = TimeUnit.SECONDS
     var CONNECT_TIMEOUT:Long = 20//TimeUnit.SECONDS

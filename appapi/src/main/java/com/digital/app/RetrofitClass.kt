@@ -20,6 +20,16 @@ object RetrofitObject {
     private val logging = HttpLoggingInterceptor()
         .setLevel(Constants.DEBUG_LEVEL)
 
+    init {
+        Constants.OK_HTTP_CLIENT?.apply {
+            if(!Constants.OK_HTTP_CLIENT_KEEP_PURE) {
+                addInterceptor(logging)
+                connectTimeout(Constants.CONNECT_TIMEOUT, Constants.TIMEOUT_UNIT)
+                readTimeout(Constants.READ_TIMEOUT, Constants.TIMEOUT_UNIT)
+                writeTimeout(Constants.WRITE_TIMEOUT, Constants.TIMEOUT_UNIT)
+            }
+        }
+    }
 
     private val httpClient = OkHttpClient.Builder()
         .addInterceptor(logging)
@@ -38,7 +48,7 @@ object RetrofitObject {
         .baseUrl(Constants.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create(customGson))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .client(Constants.OK_HTTP_CLIENT ?: httpClient.build())
+        .client(Constants.OK_HTTP_CLIENT?.build() ?: httpClient.build())
         .build()
 
 
@@ -56,7 +66,7 @@ object RetrofitObject {
             .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(customGson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(httpClient.build())
+            .client(Constants.OK_HTTP_CLIENT?.build() ?: httpClient.build())
             .build()
     }
 

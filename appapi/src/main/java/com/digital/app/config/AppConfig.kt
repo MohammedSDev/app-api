@@ -11,7 +11,8 @@ class AppConfig {
     val DEBUG_LEVEL_HEADERS = 2
     val DEBUG_LEVEL_BODY = 3
 
-    var OK_HTTP_CLIENT:OkHttpClient? = null
+    var OK_HTTP_CLIENT:OkHttpClient.Builder? = null
+    var OK_HTTP_CLIENT_KEEP_PURE:Boolean = Constants.OK_HTTP_CLIENT_KEEP_PURE
     var BASE_URL = ""
     var TIMEOUT_UNIT = TimeUnit.SECONDS
     var CONNECT_TIMEOUT: Long = 20//TimeUnit.SECONDS
@@ -29,6 +30,7 @@ fun Application.appConfig(config: AppConfig.() -> Unit) {
     //updateConstants
     Constants.apply {
         OK_HTTP_CLIENT = appConfig.OK_HTTP_CLIENT
+        OK_HTTP_CLIENT_KEEP_PURE = appConfig.OK_HTTP_CLIENT_KEEP_PURE
         BASE_URL = appConfig.BASE_URL
         TIMEOUT_UNIT = appConfig.TIMEOUT_UNIT
         CONNECT_TIMEOUT = appConfig.CONNECT_TIMEOUT
