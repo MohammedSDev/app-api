@@ -7,10 +7,11 @@ import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import retrofit2.Response
+import java.lang.Exception
 import java.net.UnknownHostException
 
 
-inline fun <reified T : ResponseModel,reified E:ErrorResponseModel> handleDataPacing2(response: retrofit2.Response<ResponseBody>): T {
+inline fun <reified T : ResponseModel, reified E : ErrorResponseModel> handleDataPacing2(response: retrofit2.Response<ResponseBody>): T {
 
     if (response.isSuccessful) {
         //success response
@@ -34,13 +35,23 @@ inline fun <reified T : ResponseModel,reified E:ErrorResponseModel> handleDataPa
 
     }
 }
-inline fun <reified E : ErrorResponseModel>failedResponseParcing2(response: Response<ResponseBody>): RetrofitThrowable {
+
+inline fun <reified E : ErrorResponseModel> failedResponseParcing2(response: Response<ResponseBody>): RetrofitThrowable {
     //failed response
     val error = converter<E>(response.errorBody())
 
-    if (error != null)
+    if (error != null) {
         return RetrofitThrowable(error, error.errorMessage)
-    else {
+    } else {
+        try {
+            val errorObj = E::class.java.getConstructor().newInstance()
+            errorObj.errorCode = Constants.ERROR_RESPONSE_EMPTY_ERROR_CODE
+            errorObj.errorMessage = Constants.GENERAL_ERROR_MESSAGE
+            return RetrofitThrowable(errorObj, errorObj.errorMessage)
+        } catch (e: Exception) {
+            //e.printStackTrace()
+        }
+
         val errorResponse = ErrorResponseModel().apply {
             errorCode = Constants.ERROR_RESPONSE_EMPTY_ERROR_CODE
             errorMessage = Constants.GENERAL_ERROR_MESSAGE
@@ -49,13 +60,13 @@ inline fun <reified E : ErrorResponseModel>failedResponseParcing2(response: Resp
     }
 }
 
-inline fun < reified T> converter(body: ResponseBody?): T? {
+inline fun <reified T> converter(body: ResponseBody?): T? {
 
     if (body == null)
         return null
 
     val converter = RetrofitObject
-            .retrofitBodyConverter<T>(T::class.java, arrayOfNulls<Annotation>(0))
+        .retrofitBodyConverter<T>(T::class.java, arrayOfNulls<Annotation>(0))
     try {
         return converter.convert(body)
     } catch (ex: IOException) {
@@ -78,20 +89,17 @@ fun errorsHandling(throwable: Throwable): ErrorResponseModel {
             errorCode = Constants.CONNECT_ERROR_CODE
             errorMessage = Constants.CONNECT_ERROR_MESSAGE
         }
-    }
-    else if (throwable is SocketTimeoutException) {
+    } else if (throwable is SocketTimeoutException) {
         error = ErrorResponseModel().apply {
             errorCode = Constants.CONNECT_TIME_OUT_ERROR_CODE
             errorMessage = Constants.CONNECT_TIME_OUT_ERROR_MESSAGE
         }
-    }
-    else if (throwable is UnknownHostException) {
+    } else if (throwable is UnknownHostException) {
         error = ErrorResponseModel().apply {
             errorCode = Constants.CONNECT_ADDRESS_ERROR_CODE
             errorMessage = Constants.CONNECT_ADDRESS_ERROR_MESSAGE
         }
-    }
-    else if (throwable is RetrofitThrowable)
+    } else if (throwable is RetrofitThrowable)
         error = throwable.error
     else {
         val text = "HeadsUp ................ new Error Not Handling................" +
@@ -107,7 +115,7 @@ fun errorsHandling(throwable: Throwable): ErrorResponseModel {
     return error
 }
 
-fun appApiLog(text:String,tag:String="appapi"){
+fun appApiLog(text: String, tag: String = "appapi") {
 //    Log.d(tag,text)
     println(text)
 }

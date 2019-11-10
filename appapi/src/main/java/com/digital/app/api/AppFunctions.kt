@@ -26,7 +26,7 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
         protected set
     var disposable: Disposable? = null
 
-    var networkStatus: ((status:AppNetworkStatus)->Unit)? = null
+    var networkStatus: ((status: AppNetworkStatus) -> Unit)? = null
         protected set
 
     fun preRequest(block: AppRequest.() -> Unit): AppFunctions {
@@ -61,23 +61,41 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
 
             val apiService = RetrofitObject.retrofit
             val ob = if (isMultiPart) {
-                if(bodyParam.isNotEmpty() && multiBodyParam.isEmpty()){
+                if (bodyParam.isNotEmpty() && multiBodyParam.isEmpty()) {
                     throw Throwable("use `multiBodyParam` instead of `bodyParam` with multiPart request ")
                 }
                 val multiPFilesList: MutableList<MultipartBody.Part> = mutableListOf()
-                multiPartFiles?.forEach {fileModel->
-                    if(fileModel.file.exists()){
-                        multiPFilesList.add(prepareFileToMultiPart(fileModel.fileKeyName,fileModel.file,fileModel.mediaType))
-                    }else{
+                multiPartFiles?.forEach { fileModel ->
+                    if (fileModel.file.exists()) {
+                        multiPFilesList.add(
+                            prepareFileToMultiPart(
+                                fileModel.fileKeyName,
+                                fileModel.file,
+                                fileModel.mediaType
+                            )
+                        )
+                    } else {
                         //log(text = "${fileModel.fileKeyName} file :${fileModel.file.absolutePath} not exist.skip it")
                     }
                 }
                 when (method) {
                     AppMethod.POST -> {
-                        apiService.postMultiPart(url, multiBodyParam, multiPFilesList, queryParam, headerParam)
+                        apiService.postMultiPart(
+                            url,
+                            multiBodyParam,
+                            multiPFilesList,
+                            queryParam,
+                            headerParam
+                        )
                     }
                     AppMethod.PUT -> {
-                        apiService.putMultiPart(url, multiBodyParam, multiPFilesList, queryParam, headerParam)
+                        apiService.putMultiPart(
+                            url,
+                            multiBodyParam,
+                            multiPFilesList,
+                            queryParam,
+                            headerParam
+                        )
                     }
                     AppMethod.GET -> {
                         throw Throwable("AppApi not support multipart request with GET method.")
@@ -104,9 +122,6 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
             }
             var ob2 = ob
                 .delay(delay, TimeUnit.MILLISECONDS)
-                .doOnSubscribe {
-                    networkStatus?.invoke(AppNetworkStatus.InProgress)
-                }
                 .subscribeOn(Schedulers.computation())
                 .map {
                     handleDataPacing2<R, E>(it)
@@ -114,13 +129,15 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
             if (observeOnMainThread ?: Constants.OBSERVER_ON_MAIN_THREAD) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
-            val dis = ob2.subscribe({
-                onSuccess?.invoke(it)
-                networkStatus?.invoke(AppNetworkStatus.OnSuccess)
-            }, {
-                onError?.invoke(errorsHandling(it))
-                networkStatus?.invoke(AppNetworkStatus.OnError)
-            }, {})
+            val dis = ob2.doOnSubscribe {
+                networkStatus?.invoke(AppNetworkStatus.InProgress)}
+                .subscribe({
+                    onSuccess?.invoke(it)
+                    networkStatus?.invoke(AppNetworkStatus.OnSuccess)
+                }, {
+                    onError?.invoke(errorsHandling(it))
+                    networkStatus?.invoke(AppNetworkStatus.OnError)
+                }, {})
             disposable = dis
             return dis
         }
@@ -140,11 +157,13 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
             val dis = ob2.subscribe({
-//                println("file connected, start write to disk. ... .")
+                //                println("file connected, start write to disk. ... .")
                 writeResponseBodyToDisk(it, file)
                 onSuccess?.invoke(ResponseModel())
             }, { err ->
-                onError?.invoke(ErrorResponseModel().also { it.errorMessage = err.message ?: err.localizedMessage })
+                onError?.invoke(ErrorResponseModel().also {
+                    it.errorMessage = err.message ?: err.localizedMessage
+                })
             }, {})
             disposable = dis
             return dis
@@ -205,9 +224,11 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
     }
 
 
-
-
-    fun prepareFileToMultiPart(partName: String, file: File, mediaType: String): MultipartBody.Part {
+    fun prepareFileToMultiPart(
+        partName: String,
+        file: File,
+        mediaType: String
+    ): MultipartBody.Part {
 
 //    val mediaType = MediaType.parse(getContentResolver().getType(fileUri))
         // create RequestBody instance from file
@@ -229,9 +250,6 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
             .getMimeTypeFromExtension(mimeTypeMap)
         return mimeType
     }
-
-
-
 
 
 }
