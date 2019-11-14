@@ -11,6 +11,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import java.io.*
+import java.net.URLConnection
 import java.util.concurrent.TimeUnit
 
 enum class AppMethod {
@@ -130,7 +131,8 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
             val dis = ob2.doOnSubscribe {
-                networkStatus?.invoke(AppNetworkStatus.InProgress)}
+                networkStatus?.invoke(AppNetworkStatus.InProgress)
+            }
                 .subscribe({
                     onSuccess?.invoke(it)
                     networkStatus?.invoke(AppNetworkStatus.OnSuccess)
@@ -260,12 +262,33 @@ fun createRequestPart(value: String): RequestBody {
     )
 }
 
+infix fun String.body(value: String): RequestBody = createRequestPart(value)
 // url = file path or whatever suitable URL you want.
 fun getMimeType(url: String): String? {
+    if (url.isEmpty()) return null
+    val file = File(url)
+    val ins = BufferedInputStream(FileInputStream(file))
+    val mimeType = URLConnection.guessContentTypeFromStream(ins)
+
+    if (mimeType.isNotEmpty())
+        return mimeType
+
     var type: String? = null
+
     val extension = MimeTypeMap.getFileExtensionFromUrl(url)
     if (extension != null) {
-        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase())
+    } else {
+        type = "*/*"
     }
     return type
+
+    //val uri = Uri.parse(url)
+    /*if (context != null
+        && uri.scheme?.equals(ContentResolver.SCHEME_CONTENT) == true
+    ) {
+        val cr = context.applicationContext.contentResolver
+        type = cr.getType(uri)
+    }
+    else*/
 }
