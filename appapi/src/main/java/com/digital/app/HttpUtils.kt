@@ -11,11 +11,12 @@ import java.lang.Exception
 import java.net.UnknownHostException
 
 
-inline fun <reified T : ResponseModel, reified E : ErrorResponseModel> handleDataPacing2(response: retrofit2.Response<ResponseBody>): T {
+inline fun <reified T : ResponseModel>
+        handleDataPacing2(type: Class<out ErrorResponseModel>,response: retrofit2.Response<ResponseBody>): T {
 
     if (response.isSuccessful) {
         //success response
-        val result = converter<T>(response.body())
+        val result = converter<T>(T::class.java,response.body())
         if (result != null)
             return result
         else {
@@ -31,20 +32,20 @@ inline fun <reified T : ResponseModel, reified E : ErrorResponseModel> handleDat
             throw RetrofitThrowable(error, error.errorMessage)
         }
     } else {
-        throw failedResponseParcing2<E>(response)
+        throw failedResponseParcing2(type,response)
 
     }
 }
 
-inline fun <reified E : ErrorResponseModel> failedResponseParcing2(response: Response<ResponseBody>): RetrofitThrowable {
+fun failedResponseParcing2(type:Class<out ErrorResponseModel>,response: Response<ResponseBody>): RetrofitThrowable {
     //failed response
-    val error = converter<E>(response.errorBody())
+    val error = converter(type,response.errorBody())
 
     if (error != null) {
         return RetrofitThrowable(error, error.errorMessage)
     } else {
         try {
-            val errorObj = E::class.java.getConstructor().newInstance()
+            val errorObj = type.getConstructor().newInstance()
             errorObj.errorCode = Constants.ERROR_RESPONSE_EMPTY_ERROR_CODE
             errorObj.errorMessage = Constants.GENERAL_ERROR_MESSAGE
             return RetrofitThrowable(errorObj, errorObj.errorMessage)
@@ -60,13 +61,13 @@ inline fun <reified E : ErrorResponseModel> failedResponseParcing2(response: Res
     }
 }
 
-inline fun <reified T> converter(body: ResponseBody?): T? {
+fun <T>converter(type:Class<T>,body: ResponseBody?): T? {
 
     if (body == null)
         return null
 
     val converter = RetrofitObject
-        .retrofitBodyConverter<T>(T::class.java, arrayOfNulls<Annotation>(0))
+        .retrofitBodyConverter<T>(type, arrayOfNulls<Annotation>(0))
     try {
         return converter.convert(body)
     } catch (ex: IOException) {

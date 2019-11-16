@@ -153,7 +153,7 @@ open class AppFunctions(val method: AppMethod, val appRequestParam: AppRequestPa
 
 
 
-    inline fun <reified R : ResponseModel, reified E : ErrorResponseModel> call(): AppRequest {
+    inline fun <reified R : ResponseModel> call(): AppRequest {
 
 
         with(appRequestParam) {
@@ -223,7 +223,7 @@ open class AppFunctions(val method: AppMethod, val appRequestParam: AppRequestPa
                 .delay(delay, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.computation())
                 .map {
-                    handleDataPacing2<R, E>(it)
+                    handleDataPacing2<R>(errorModel ?: Constants.errorModel,it)
                 }
             if (observeOnMainThread ?: Constants.OBSERVER_ON_MAIN_THREAD) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())

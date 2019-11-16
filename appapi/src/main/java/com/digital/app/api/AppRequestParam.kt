@@ -1,5 +1,6 @@
 package com.digital.app.api
 
+import com.digital.app.ErrorResponseModel
 import com.digital.app.config.AppUploadableFile
 import okhttp3.RequestBody
 import java.io.File
@@ -18,5 +19,6 @@ class AppRequestParam(var url: String){
     var isMultiPart: Boolean = false
     var multiPartFiles: List<AppUploadableFile>? = null
     var multiBodyParam: Map<String,RequestBody> = hashMapOf()
+    var errorModel : Class<out ErrorResponseModel>? = null
 
 }
