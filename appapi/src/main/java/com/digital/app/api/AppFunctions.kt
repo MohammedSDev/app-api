@@ -39,9 +39,20 @@ class AppCompositeDisposable :  Disposable, DisposableContainer{
         return comD.add(d)
     }
 
-    fun add(key:String,d: AppRequest): Boolean {
-        comDisKey[key] = d
-        return comD.add(d)
+    /**
+     * Adds a AppRequest to this container or cancel it if the
+     * container has been disposed.
+     * @param request the AppRequest to add, not null
+     * @param override if true,cancel the exist AppRequest with same key.
+     * @return true if successful, false if this container has been disposed
+     * @throws NullPointerException if {@code request} is null
+     */
+    fun add(key:String,request: AppRequest,override:Boolean = true): Boolean {
+        if (override){
+            comDisKey[key]?.dispose()
+        }
+        comDisKey[key] = request
+        return comD.add(request)
     }
     fun get(key:String):AppRequest?{
         return comDisKey[key]
@@ -82,6 +93,16 @@ class AppCompositeDisposable :  Disposable, DisposableContainer{
     }
 
     override fun delete(d: Disposable): Boolean {
+        if(d is AppRequest) {
+            if(comDisKey.containsValue(d)){
+                comDisKey.keys.iterator().forEach {
+                    if(comDisKey.get(it)?.equals(d) == true){
+                        comDisKey.remove(it)
+                        return@forEach
+                    }
+                }
+            }
+        }
         return comD.delete(d)
     }
 
@@ -89,7 +110,11 @@ class AppCompositeDisposable :  Disposable, DisposableContainer{
         return comD.isDisposed
     }
 
+    fun cancelAll(){
+        dispose()
+    }
     override fun dispose() {
+        comDisKey.clear()
         comD.dispose()
     }
 

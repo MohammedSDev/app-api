@@ -22,6 +22,13 @@ class AppConfig {
     var OBSERVER_ON_MAIN_THREAD: Boolean = true
     var ADAPTERS: List<AppApiAdapterComponent> = listOf()
 
+
+
+    var GENERAL_ERROR_MESSAGE = Constants.GENERAL_ERROR_MESSAGE
+    var CONNECT_ERROR_MESSAGE = Constants.CONNECT_ERROR_MESSAGE
+    var CONNECT_TIME_OUT_ERROR_MESSAGE = Constants.CONNECT_TIME_OUT_ERROR_MESSAGE
+    var CONNECT_ADDRESS_ERROR_MESSAGE = Constants.CONNECT_ADDRESS_ERROR_MESSAGE
+
 }
 
 fun Application.appConfig(config: AppConfig.() -> Unit) {
@@ -46,6 +53,12 @@ fun Application.appConfig(config: AppConfig.() -> Unit) {
             appConfig.DEBUG_LEVEL_BODY -> HttpLoggingInterceptor.Level.BODY
             else -> HttpLoggingInterceptor.Level.BODY
         }
+
+
+        CONNECT_ERROR_MESSAGE = appConfig.GENERAL_ERROR_MESSAGE
+        CONNECT_ERROR_MESSAGE = appConfig.CONNECT_ERROR_MESSAGE
+        CONNECT_TIME_OUT_ERROR_MESSAGE = appConfig.CONNECT_TIME_OUT_ERROR_MESSAGE
+        CONNECT_ADDRESS_ERROR_MESSAGE = appConfig.CONNECT_ADDRESS_ERROR_MESSAGE
 
 
     }

@@ -1,22 +1,35 @@
 package com.digital.app.config
 
+import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
+import kotlin.reflect.KClass
 
 
- object Constants {
+object Constants {
     var OK_HTTP_CLIENT:OkHttpClient.Builder? = null
+    internal  set
     var OK_HTTP_CLIENT_KEEP_PURE:Boolean = false
+        internal  set
     var BASE_URL = ""
+        internal  set
     var TIMEOUT_UNIT = TimeUnit.SECONDS
+        internal  set
     var CONNECT_TIMEOUT:Long = 20//TimeUnit.SECONDS
+    internal  set
     var READ_TIMEOUT:Long = 20//TimeUnit.SECONDS
+    internal  set
     var WRITE_TIMEOUT:Long = 30//TimeUnit.SECONDS
+    internal  set
     var DEBUG_LEVEL:HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.BODY
+        internal  set
     var OBSERVER_ON_MAIN_THREAD:Boolean = true
+        internal  set
     var ADAPTERS:List<AppApiAdapterComponent> = listOf()
+        internal  set
+
 
 
 
@@ -31,8 +44,12 @@ import java.util.concurrent.TimeUnit
 
 
     var GENERAL_ERROR_MESSAGE = "Some thing went wrong. try later"
+        internal  set
     var CONNECT_ERROR_MESSAGE = "Check your connection."
+        internal  set
     var CONNECT_TIME_OUT_ERROR_MESSAGE = "Time out, try later."
+        internal  set
     var CONNECT_ADDRESS_ERROR_MESSAGE = "Host address could not be determined."
+        internal  set
 
 }
