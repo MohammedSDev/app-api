@@ -4,7 +4,9 @@ import android.webkit.MimeTypeMap
 import com.digital.app.*
 import com.digital.app.config.Constants
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.internal.disposables.DisposableContainer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -18,20 +20,93 @@ enum class AppMethod {
     POST, GET, PUT, DELETE
 }
 
-open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
+class AppRequest(private val disposable: Disposable):Disposable{
+    override fun isDisposed() = disposable.isDisposed
+
+    override fun dispose() {
+        disposable.dispose()
+    }
+
+    fun cancel() {
+        disposable.dispose()
+    }
+}
+class AppCompositeDisposable :  Disposable, DisposableContainer{
+    private val comD = CompositeDisposable()
+    private val comDisKey = hashMapOf<String,AppRequest>()
+
+    override fun add(d: Disposable): Boolean {
+        return comD.add(d)
+    }
+
+    fun add(key:String,d: AppRequest): Boolean {
+        comDisKey[key] = d
+        return comD.add(d)
+    }
+    fun get(key:String):AppRequest?{
+        return comDisKey[key]
+    }
+
+    /**
+     * Removes and disposes the given disposable if it is part of this
+     * container.
+     * @param disposable the disposable to remove and dispose, not null
+     * @return true if the operation was successful
+     */
+    override fun remove(d: Disposable): Boolean {
+        return comD.remove(d)
+    }
+
+    /**
+     * Removes and disposes the given disposable if it is part of this
+     * container.
+     * @param key the disposable key to remove and dispose, not null
+     * @return true if the operation was successful
+     */
+    @Synchronized fun remove(key: String): Boolean {
+        if(isDisposed)
+            return false
+        val dis = comDisKey[key] ?: return false
+        comDisKey.remove(key)
+        return comD.remove(dis)
+    }
+
+    /**
+     * cancel the given AppRequest if it is part of this
+     * container.
+     * @param key the appRequest key to cancel, not null
+     * @return true if the operation was successful
+     */
+    @Synchronized fun cancel(key: String): Boolean {
+      return remove(key)
+    }
+
+    override fun delete(d: Disposable): Boolean {
+        return comD.delete(d)
+    }
+
+    override fun isDisposed(): Boolean {
+        return comD.isDisposed
+    }
+
+    override fun dispose() {
+        comD.dispose()
+    }
+
+}
+open class AppFunctions(val method: AppMethod, val appRequestParam: AppRequestParam) {
 
 
     var onSuccess: ((response: ResponseModel) -> Unit)? = null
         protected set
     var onError: ((response: ErrorResponseModel) -> Unit)? = null
         protected set
-    var disposable: Disposable? = null
 
     var networkStatus: ((status: AppNetworkStatus) -> Unit)? = null
         protected set
 
-    fun preRequest(block: AppRequest.() -> Unit): AppFunctions {
-        block(appRequest)
+    fun preRequest(block: AppRequestParam.() -> Unit): AppFunctions {
+        block(appRequestParam)
         return this
     }
 
@@ -50,15 +125,13 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
         return this
     }
 
-    fun cancel() {
-        disposable?.dispose()
-    }
 
 
-    inline fun <reified R : ResponseModel, reified E : ErrorResponseModel> call(): Disposable {
+
+    inline fun <reified R : ResponseModel, reified E : ErrorResponseModel> call(): AppRequest {
 
 
-        with(appRequest) {
+        with(appRequestParam) {
 
             val apiService = RetrofitObject.retrofit
             val ob = if (isMultiPart) {
@@ -140,15 +213,14 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                     onError?.invoke(errorsHandling(it))
                     networkStatus?.invoke(AppNetworkStatus.OnError)
                 }, {})
-            disposable = dis
-            return dis
+            return AppRequest(dis)
         }
 
     }
 
-    fun download(file: File): Disposable {
+    fun download(file: File): AppRequest {
 
-        with(appRequest) {
+        with(appRequestParam) {
 
 
             var ob2 = RetrofitObject.retrofit.downloadFileUrlSync(url, headerParam)
@@ -167,8 +239,7 @@ open class AppFunctions(val method: AppMethod, val appRequest: AppRequest) {
                     it.errorMessage = err.message ?: err.localizedMessage
                 })
             }, {})
-            disposable = dis
-            return dis
+            return AppRequest(dis)
         }
 
     }

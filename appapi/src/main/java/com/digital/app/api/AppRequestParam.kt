@@ -9,7 +9,7 @@ import java.nio.file.Files
 /**
  * container of request params & options
  * */
-class AppRequest(var url: String){
+class AppRequestParam(var url: String){
     var headerParam: Map<String,String> = hashMapOf()
     var queryParam: Map<String,Any> = hashMapOf()
     var bodyParam: Map<String,Any> = hashMapOf()
