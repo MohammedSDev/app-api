@@ -2,34 +2,47 @@ package com.digital.app.api
 
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
+import com.digital.app.config.Constants
 import java.io.File
 
 fun post(endPoint: String): AppFunctions {
     val appReq = AppRequestParam(endPoint)
 
-    return AppFunctions(AppMethod.POST, appReq)
 
+    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+        AppRequestParam::class.java)?.newInstance(
+        AppMethod.POST, appReq)
+        ?: AppFunctions(AppMethod.POST, appReq)
 }
 
 fun put(endPoint: String): AppFunctions {
     val appReq = AppRequestParam(endPoint)
 
-    return AppFunctions(AppMethod.PUT, appReq)
+    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+        AppRequestParam::class.java)?.newInstance(
+        AppMethod.PUT, appReq)
+        ?: AppFunctions(AppMethod.PUT, appReq)
+
 
 }
 
 fun get(endPoint: String): AppFunctions {
     val appReq = AppRequestParam(endPoint)
 
-    return AppFunctions(AppMethod.GET, appReq)
 
+    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+        AppRequestParam::class.java)?.newInstance(
+        AppMethod.GET, appReq)
+        ?: AppFunctions(AppMethod.GET, appReq)
 }
 
 fun delete(endPoint: String): AppFunctions {
     val appReq = AppRequestParam(endPoint)
 
-    return AppFunctions(AppMethod.DELETE, appReq)
-
+    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+        AppRequestParam::class.java)?.newInstance(
+        AppMethod.DELETE, appReq)
+        ?: AppFunctions(AppMethod.DELETE, appReq)
 }
 
 

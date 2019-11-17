@@ -2,6 +2,7 @@ package com.digital.app.config
 
 import android.app.Application
 import com.digital.app.ErrorResponseModel
+import com.digital.app.api.AppFunctions
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -23,7 +24,7 @@ class AppConfig {
     var OBSERVER_ON_MAIN_THREAD: Boolean = true
     var ADAPTERS: List<AppApiAdapterComponent> = listOf()
     var errorModel : Class<out ErrorResponseModel> = Constants.errorModel
-
+    var customAppFunction: Class<out AppFunctions>? = null
 
 
     var GENERAL_ERROR_MESSAGE = Constants.GENERAL_ERROR_MESSAGE
@@ -47,7 +48,8 @@ fun Application.appConfig(config: AppConfig.() -> Unit) {
         WRITE_TIMEOUT = appConfig.WRITE_TIMEOUT
         OBSERVER_ON_MAIN_THREAD = appConfig.OBSERVER_ON_MAIN_THREAD
         ADAPTERS = appConfig.ADAPTERS
-        errorModel  =appConfig.errorModel
+        errorModel  = appConfig.errorModel
+        customAppFunction  = appConfig.customAppFunction
 
         DEBUG_LEVEL = when(appConfig.DEBUG_LEVEL){
             appConfig.DEBUG_LEVEL_NONE -> HttpLoggingInterceptor.Level.NONE

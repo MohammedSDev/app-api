@@ -2,6 +2,7 @@ package com.digital.app.config
 
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
+import com.digital.app.api.AppFunctions
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -30,6 +31,8 @@ object Constants {
     var ADAPTERS:List<AppApiAdapterComponent> = listOf()
         internal  set
     var errorModel : Class<out ErrorResponseModel> = ErrorResponseModel::class.java
+        internal  set
+    var customAppFunction : Class<out AppFunctions>? = null
         internal  set
 
 
