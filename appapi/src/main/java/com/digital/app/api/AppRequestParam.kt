@@ -20,5 +20,6 @@ class AppRequestParam(var url: String){
     var multiPartFiles: List<AppUploadableFile>? = null
     var multiBodyParam: Map<String,RequestBody> = hashMapOf()
     var errorModel : Class<out ErrorResponseModel>? = null
+    var handleNetworkStatus : Boolean = true
 
 }

@@ -20,15 +20,23 @@ enum class AppMethod {
     POST, GET, PUT, DELETE
 }
 
-class AppRequest(private val disposable: Disposable):Disposable{
+class AppRequest(private val disposable: Disposable,
+                 private val networkStatus: ((status: AppNetworkStatus) -> Unit)?
+):Disposable{
     override fun isDisposed() = disposable.isDisposed
 
     override fun dispose() {
         disposable.dispose()
     }
 
-    fun cancel() {
+    fun cancel(onCancelStatus:Boolean = true) {
         disposable.dispose()
+        if(onCancelStatus)
+            networkStatus?.invoke(AppNetworkStatus.OnCancel(null,null))
+    }
+
+    fun onCancelStatus(message:String? = null,tag:Any? = null) {
+        networkStatus?.invoke(AppNetworkStatus.OnCancel(message,tag))
     }
 }
 class AppCompositeDisposable :  Disposable, DisposableContainer{
@@ -124,7 +132,13 @@ open class AppFunctions(val method: AppMethod, val appRequestParam: AppRequestPa
 
     var onSuccess: ((response: ResponseModel) -> Unit)? = null
         protected set
+    var onSuccessStatus: ((response: ResponseModel,networkStatus:((state:AppNetworkStatus) ->Unit)?) -> Unit)? = null
+        protected set
+
     var onError: ((response: ErrorResponseModel) -> Unit)? = null
+        protected set
+
+    var onErrorStatus: ((response: ErrorResponseModel,networkStatus:((state:AppNetworkStatus) ->Unit)?) -> Unit)? = null
         protected set
 
     var networkStatus: ((status: AppNetworkStatus) -> Unit)? = null
@@ -140,12 +154,23 @@ open class AppFunctions(val method: AppMethod, val appRequestParam: AppRequestPa
         return this
     }
 
+    open fun onSuccess(block: (response: ResponseModel,status:((state:AppNetworkStatus)->Unit)? ) -> Unit): AppFunctions {
+        onSuccessStatus = block
+        return this
+    }
+
     open fun onError(block: (response: ErrorResponseModel) -> Unit): AppFunctions {
         onError = block
         return this
     }
 
-    open fun onStatusChange(block: (status: AppNetworkStatus) -> Unit): AppFunctions {
+
+    open fun onError(block: (response: ErrorResponseModel,status:((state:AppNetworkStatus)->Unit)?) -> Unit): AppFunctions {
+        onErrorStatus = block
+        return this
+    }
+
+    fun onStatusChange(block: (status: AppNetworkStatus) -> Unit): AppFunctions {
         networkStatus = block
         return this
     }
@@ -229,16 +254,19 @@ open class AppFunctions(val method: AppMethod, val appRequestParam: AppRequestPa
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
             val dis = ob2.doOnSubscribe {
-                networkStatus?.invoke(AppNetworkStatus.InProgress)
+                if (handleNetworkStatus)
+                    networkStatus?.invoke(AppNetworkStatus.InProgress())
             }
                 .subscribe({
-                    onSuccess?.invoke(it)
-                    networkStatus?.invoke(AppNetworkStatus.OnSuccess)
+                    onSuccessStatus?.invoke(it,networkStatus) ?: onSuccess?.invoke(it)
+                    if (handleNetworkStatus)
+                        networkStatus?.invoke(AppNetworkStatus.OnSuccess())
                 }, {
-                    onError?.invoke(errorsHandling(it))
-                    networkStatus?.invoke(AppNetworkStatus.OnError)
+                    onErrorStatus?.invoke(errorsHandling(it),networkStatus) ?: onError?.invoke(errorsHandling(it))
+                    if (handleNetworkStatus)
+                        networkStatus?.invoke(AppNetworkStatus.OnError())
                 }, {})
-            return AppRequest(dis)
+            return AppRequest(dis,networkStatus)
         }
 
     }
@@ -264,7 +292,7 @@ open class AppFunctions(val method: AppMethod, val appRequestParam: AppRequestPa
                     it.errorMessage = err.message ?: err.localizedMessage
                 })
             }, {})
-            return AppRequest(dis)
+            return AppRequest(dis,networkStatus)
         }
 
     }
