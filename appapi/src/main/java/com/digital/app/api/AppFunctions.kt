@@ -1,5 +1,6 @@
 package com.digital.app.api
 
+import android.util.Base64
 import android.webkit.MimeTypeMap
 import com.digital.app.*
 import com.digital.app.config.Constants
@@ -386,7 +387,7 @@ fun createRequestPart(value: String): RequestBody {
     )
 }
 
-infix fun String.body(value: String): RequestBody = createRequestPart(value)
+infix fun String.toRequest(value: String): RequestBody = createRequestPart(value)
 // url = file path or whatever suitable URL you want.
 fun getMimeType(url: String): String? {
     if (url.isEmpty()) return null
@@ -415,4 +416,11 @@ fun getMimeType(url: String): String? {
         type = cr.getType(uri)
     }
     else*/
+}
+
+fun File.toBase64(): String? {
+    val fileInputStreamReader = FileInputStream(this)
+    val bytes = ByteArray(this.length().toInt())
+    fileInputStreamReader.read(bytes)
+    return Base64.encodeToString(bytes, Base64.DEFAULT)
 }
