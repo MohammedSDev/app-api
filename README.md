@@ -189,6 +189,12 @@ delete("repositories", MainResponse::class.java, MainErrorModel::class.java)
 ```
 # using Java 
 ```java
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import static com.digital.app.api.ActionsKt.get;
+
+...
+
 get("categories", CategoryRes.class, ErrorModel.class)
 .preRequest(new Function1<AppRequestParam, Unit>() {
     @Override
