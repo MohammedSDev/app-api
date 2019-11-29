@@ -1,13 +1,23 @@
 package com.digital.appapidemo
 
-import android.provider.SyncStateContract
+import com.digital.app.AppNetworkStatus
+import com.digital.app.ErrorResponseModel
+import com.digital.app.ResponseModel
+import com.digital.app.RetrofitObject
 import com.digital.app.api.*
+import com.digital.app.config.AppApiAdapterComponent
 import com.digital.app.config.AppUploadableFile
+import com.digital.app.config.Constants
 import com.digital.app.config.appConfig
 import org.junit.Test
 
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.BeforeClass
+import java.io.BufferedInputStream
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -15,80 +25,24 @@ import java.io.File
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class ExampleUnitTest {
+    private val THREAD_SLEEP: Long = 8000
+
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
 
+    @Before
+    fun appConfig() {
+        appConfig {
+//            BASE_URL = "https://api.tuby.dev.clicksandbox.com/v1/mob/channels/"
+            BASE_URL = "http://api.dev.jisr.net/v2/"
+            OBSERVER_ON_MAIN_THREAD = false
 
-    @Test
-    fun testLogin2() {
-        val p = hashMapOf<String, Any>(
-            "login" to "7",
-            "password" to "777",
-            "slug" to "bingazy"
-        )
-
-
-
-        post<CustomAppFun>()
-            .preRequest {
-                queryParam = p
-                url = "sessions"
-//                observeOnMainThread = false
-//                delay = 0000L
-            }
-            .onSuccess {
-
-
-            }
-            .onError {
-                if (it is MainErrorModel) {
-                    println( "onError. is main Error model")
-
-                } else {
-                    println("onError. not mainError model")
-                }
-                println("onError,${it.errorCode}")
-                println( "onError,${it.errorMessage}")
-                println( "onError server mes,${(it as MainErrorModel).error}")
-            }
-            .call<MainResponse, MainErrorModel>()
-
-
-
-
-        /*post("http://api.dev.jisr.net/v2/sessions")
-            .preRequest {
-                queryParam = p
-//                delay = 0000L
-            }
-            .onSuccess {
-                if (it is LoginModel) {
-                    println(it.message)
-                    println( it.success)
-                } else {
-                    println( "onsuccess, not LoginModel..$it.toString()")
-                }
-
-            }
-            .onError {
-                if (it is MainErrorModel) {
-                    println( "onError. is main Error model")
-
-                } else {
-                    println("onError. not mainError model")
-                }
-                println("onError,${it.errorCode}")
-                println( "onError,${it.errorMessage}")
-            }
-            .call<LoginModel, MainErrorModel>()*/
-
-
-
-        Thread.sleep(700000)
-
+        }
     }
+
+    /*
 
 
     @Test
@@ -103,7 +57,7 @@ class ExampleUnitTest {
         println(file)
 //        val url = "https://download.quranicaudio.com/quran/abdulwadood_haneef/021.mp3"
         val url = "https://www.shell.com/energy-and-innovation/the-energy-future/scenarios/shell-scenario-sky/_jcr_content/pagePromo/image.img.960.jpeg/1548184031017/clear-blue-sky.jpeg"
-        download(file, AppRequest(url).also { it.observeOnMainThread = false },{
+        download(file, AppRequestParam(url).also { it.observeOnMainThread = false },{
             println("download success :)\nfile 👍 size:${file.length()}")
         },{
             println("download failed..:($it")
@@ -135,9 +89,10 @@ class ExampleUnitTest {
                 )
                 observeOnMainThread = false
             }
-            .onSuccess {  println("onSuccess,  ")}
-            .onError { println("onError, ${it.errorCode},${it.errorMessage}") }
-            .call<MainResponse,MainErrorModel>()
+            .onSuccess { it-> println("onSuccess,  ")}
+            .onError {it->  println("onError, ${it.errorCode},${it.errorMessage}") }
+            .onStatusChange { println(it.toString()) }
+            .call<MainResponse>()
 
 
         Thread.sleep(900000)
@@ -145,24 +100,420 @@ class ExampleUnitTest {
     }
 
 
+    @Test
+    fun testOnError(){
 
+
+        val url = "https://api-reservation-test.herokuapp.com/v1/user?locale=ar"
+//        appConfig {
+//            BASE_URL = "https://www.google.com/"
+//            OBSERVER_ON_MAIN_THREAD = false
+////            errorModel = MainErrorModel::class.java
+//        }
+        val request = get(url)
+            .preRequest { errorModel = MainErrorModel::class.java
+            handleNetworkStatus = false }
+            .onSuccess { it-> println("onSuccess") }
+            .onError {it,state->
+                println("onError")
+                println(it.javaClass)
+
+                if(it is MainErrorModel){
+                    println("error is MainErrorModel.class")
+                    println(it.error)
+                    state?.invoke(AppNetworkStatus.OnError(it.error,false))
+                }
+            }
+            .onStatusChange {
+                println("--------------------------onStatusChange------------------")
+                val c = when(it){
+                    is AppNetworkStatus.InProgress ->{}
+                    is AppNetworkStatus.OnSuccess ->{}
+                    is AppNetworkStatus.OnError ->{
+                        println("--------------OnError--------------------")
+                        println("message:${it.message}")
+                        println("tag: $it.tag")
+                    }
+                    is AppNetworkStatus.OnCustom->{}
+                    is AppNetworkStatus.OnCancel->{
+                        println("--------------------------OnCancel------------------")
+                    }
+                }
+                println(it.toString())
+            }
+            .call<MainResponse>()
+
+        Thread.sleep(900000)
+
+    }
+    @Test
+    fun fileFun(){
+        File("").toBase64()
+    }
+
+    @Test
+    fun testOnCancel(){
+
+
+        val url = "https://api-reservation-test.herokuapp.com/v1/user?locale=ar"
+//        appConfig {
+//            BASE_URL = "https://www.google.com/"
+//            OBSERVER_ON_MAIN_THREAD = false
+////            errorModel = MainErrorModel::class.java
+//        }
+        val request = get(url)
+            .preRequest { errorModel = MainErrorModel::class.java
+            handleNetworkStatus = false }
+            .onSuccess { it-> println("onSuccess") }
+            .onError {it,state->
+                println("onError")
+                println(it.javaClass)
+
+                if(it is MainErrorModel){
+                    println("error is MainErrorModel.class")
+                    println(it.error)
+                    state?.invoke(AppNetworkStatus.OnError(it.error,false))
+                }
+            }
+            .onStatusChange {
+                println("--------------------------onStatusChange------------------")
+                val c = when(it){
+                    is AppNetworkStatus.InProgress ->{}
+                    is AppNetworkStatus.OnSuccess ->{}
+                    is AppNetworkStatus.OnError ->{
+                        println("--------------OnError--------------------")
+                        println("message:${it.message}")
+                        println("tag: $it.tag")
+                    }
+                    is AppNetworkStatus.OnCustom->{}
+                    is AppNetworkStatus.OnCancel->{
+                        println("--------------------------OnCancel------------------")
+                    }
+                }
+                println(it.toString())
+            }
+            .call<MainResponse>()
+
+        Thread.sleep(600)
+        request.cancel()
+        Thread.sleep(900000)
+
+    }
+    @Test
+    fun testUrlConnect(){
+        val url = URL("http://api.tuby.dev.clicksandbox.com/v1/mob/channels")
+        val urlConnection = url.openConnection() as HttpURLConnection
+        urlConnection.requestMethod = "POST"
+        try {
+            val `in` = BufferedInputStream(urlConnection.getInputStream())
+            println("-----------in---------")
+//            readStream(`in`)
+        } finally {
+            urlConnection.disconnect()
+        }
+
+
+        Thread.sleep(20000)
+
+    }*/
+
+    @Test
+    fun testLoginError() {
+        val p = hashMapOf<String, Any>(
+            "login" to "7",
+            "password" to "777",
+            "slug" to "bingazy"
+        )
+
+
+
+
+        post<MainResponse, MainErrorModel, CustomAppFun>(
+            CustomAppFun::class.java,
+            MainResponse::class.java,
+            MainErrorModel::class.java)
+
+            .preRequest {
+                queryParam = p
+                url = "sessions"
+//                observeOnMainThread = false
+//                delay = 0000L
+            }
+            .onSuccess { it ->
+                assertTrue(it is MainResponse)
+                assertEquals(MainResponse::javaClass,it.javaClass )
+
+            }
+            .onError { it ->
+               if (it is MainErrorModel) {
+                    println("onError. is main Error model")
+
+                } else {
+                    println("onError. not mainError model")
+                }
+                println("onError,${it.errorCode}")
+                println("onError,${it.errorMessage}")
+                println("onError server mes,${(it as MainErrorModel).error}")
+                assertTrue(it is MainErrorModel)
+                println("expected type " + MainErrorModel::javaClass)
+                println("actual type "+it::javaClass)
+//                assertEquals(MainErrorModel::javaClass,it.javaClass )
+
+            }
+            .call()
+        Thread.sleep(THREAD_SLEEP)
+
+    }
+
+    @Test
+    fun testLoginSuccess() {
+        val p = hashMapOf<String, Any>(
+            "login" to "7",
+            "password" to "7",
+            "slug" to "bingazy"
+        )
+
+
+
+
+        post<MainResponse, MainErrorModel, CustomAppFun>(
+            CustomAppFun::class.java,
+            MainResponse::class.java,
+            MainErrorModel::class.java)
+
+            .preRequest {
+                queryParam = p
+                url = "sessions"
+//                observeOnMainThread = false
+//                delay = 0000L
+            }
+            .onSuccess { it ->
+                println("onSuccess printing ...")
+                println(it.success)
+
+                assertTrue(it is MainResponse)
+
+            }
+            .onError { it ->
+                assertTrue(it is MainErrorModel)
+                assertEquals(MainErrorModel::javaClass,it.javaClass )
+                if (it is MainErrorModel) {
+                    println("onError. is main Error model")
+
+                } else {
+                    println("onError. not mainError model")
+                }
+                println("onError,${it.errorCode}")
+                println("onError,${it.errorMessage}")
+                println("onError server mes,${(it as MainErrorModel).error}")
+            }
+            .call()
+
+        Thread.sleep(THREAD_SLEEP)
+
+    }
+
+    private fun <T:ResponseModel, E:ErrorResponseModel, A : AppFunctions<T,E>> post2(
+        response: Class<A>,
+        error: Class<T>,
+        appFunction: Class<E>
+    ) {
+
+
+    }
+
+    @Test
+    fun testHttps() {
+
+
+        val url = "https://api.tuby.dev.clicksandbox.com/v1/mob/channels"
+//        Constants.BASE_URL = "https://www.google.com/"
+//        Constants.OBSERVER_ON_MAIN_THREAD = false
+
+        val request = post(url, MainResponse::class.java, MainErrorModel::class.java)
+            .preRequest { observeOnMainThread = false }
+            .onSuccess { it, status ->
+                status?.invoke(AppNetworkStatus.OnCustom(1))
+                println("\n\n\n\n\n------onSuccess-----\n\n\n\n\n")
+            }
+            .onError { it, status ->
+                status?.invoke(AppNetworkStatus.OnError())
+                println(
+                    "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n--------------------onError----------\n" +
+                            "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n"
+                )
+                assertTrue(it is MainErrorModel)
+                println(it.error)
+            }
+            .onSuccess { it ->
+                assertTrue(it is MainResponse)
+                Thread.interrupted()
+
+            }
+            .onStatusChange {
+                val c = when (it) {
+                    is AppNetworkStatus.InProgress -> {
+                    }
+                    is AppNetworkStatus.OnSuccess -> {
+                    }
+                    is AppNetworkStatus.OnError -> {
+                    }
+                    is AppNetworkStatus.OnCustom -> {
+                    }
+                    is AppNetworkStatus.OnCancel -> {
+                    }
+                }
+                println("--------------------------Sattus------------------")
+                println(it.toString())
+            }
+            .call()
+
+        Thread.sleep(15000)
+
+    }
+
+    @Test
+    fun testHttpsCancel() {
+
+
+        val url = "https://api.tuby.dev.clicksandbox.com/v1/mob/channels"
+//        Constants.BASE_URL = "https://www.google.com/"
+//        Constants.OBSERVER_ON_MAIN_THREAD = false
+
+        val request = post(url, MainResponse::class.java, MainErrorModel::class.java)
+            .preRequest { observeOnMainThread = false }
+            .onSuccess { it, status ->
+                status?.invoke(AppNetworkStatus.OnCustom(1))
+                println("\n\n\n\n\n------onSuccess-----\n\n\n\n\n")
+            }
+            .onError { it, status ->
+                status?.invoke(AppNetworkStatus.OnError())
+                println(
+                    "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n--------------------onError----------\n" +
+                            "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n"
+                )
+                assertTrue(it is MainErrorModel)
+                println(it.error)
+            }
+            .onSuccess { it ->
+                assertTrue(it is MainResponse)
+                Thread.interrupted()
+
+            }
+            .onStatusChange {
+                val c = when (it) {
+                    is AppNetworkStatus.InProgress -> {
+                    }
+                    is AppNetworkStatus.OnSuccess -> {
+                    }
+                    is AppNetworkStatus.OnError -> {
+                    }
+                    is AppNetworkStatus.OnCustom -> {
+                    }
+                    is AppNetworkStatus.OnCancel -> {
+                    }
+                }
+                println("--------------------------Sattus------------------")
+                println(it.toString())
+            }
+            .call()
+
+        request.cancel()
+        Thread.sleep(15000)
+
+    }
+
+    @Test
+    fun testHttpsCancel2() {
+
+        val requests = AppCompositeDisposable()
+        val CHANNEL_API_REQUEST = "channel"
+        val url = "https://api.tuby.dev.clicksandbox.com/v1/mob/channels"
+//        Constants.BASE_URL = "https://www.google.com/"
+//        Constants.OBSERVER_ON_MAIN_THREAD = false
+
+        val request = post(url, MainResponse::class.java, MainErrorModel::class.java)
+            .preRequest { observeOnMainThread = false }
+            .onSuccess { it, status ->
+                status?.invoke(AppNetworkStatus.OnCustom(1))
+                println("\n\n\n\n\n------onSuccess-----\n\n\n\n\n")
+            }
+            .onError { it, status ->
+                status?.invoke(AppNetworkStatus.OnError())
+                println(
+                    "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n--------------------onError----------\n" +
+                            "\n" +
+                            "\n" +
+                            "\n" +
+                            "\n"
+                )
+                assertTrue(it is MainErrorModel)
+                println(it.error)
+            }
+            .onSuccess { it ->
+                assertTrue(it is MainResponse)
+                Thread.interrupted()
+
+            }
+            .onStatusChange {
+                val c = when (it) {
+                    is AppNetworkStatus.InProgress -> {
+                    }
+                    is AppNetworkStatus.OnSuccess -> {
+                    }
+                    is AppNetworkStatus.OnError -> {
+                    }
+                    is AppNetworkStatus.OnCustom -> {
+                    }
+                    is AppNetworkStatus.OnCancel -> {
+                    }
+                }
+                println("--------------------------Sattus------------------")
+                println(it.toString())
+            }
+            .call()
+
+        requests.add(CHANNEL_API_REQUEST,request)
+        Thread.sleep(1000)
+        requests.cancel(CHANNEL_API_REQUEST)
+        Thread.sleep(15000)
+
+    }
 }
 
-
+@Test
+fun testCase(){
+//    val cz = AppApiAdapterComponent(String::class.java,TestDeseializeGson())
+////    Constants.BASE_URL = "http://www.google.com"
+////    Constants.ADAPTERS = listOf(cz)
+//
+//
+//
+//
+//
+//    val tls = MyApi::class.java
+//    RetrofitObject.getCustomRetrofit(MyApi::class.java).testGet()
+}
 /*
-    @Test
-    fun testCase(){
-        val cz = AppApiAdapterComponent(String::class.java,TestDeseializeGson())
-        Constants.BASE_URL = "http://www.google.com"
-        Constants.ADAPTERS = listOf(cz)
 
-
-
-
-
-        val c = MyApi::class.java
-        RetrofitObject.getCustomRetrofit(MyApi::class.java).testGet()
-    }
 }
 
 
