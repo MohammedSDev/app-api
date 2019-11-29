@@ -1,5 +1,6 @@
 package com.digital.app.api
 
+import com.digital.app.AppRequestBody
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import com.digital.app.config.AppUploadableFile
@@ -19,7 +20,7 @@ class AppRequestParam(var url: String){
     var observeOnMainThread: Boolean? = null
     var isMultiPart: Boolean = false
     var multiPartFiles: List<AppUploadableFile>? = null
-    var multiBodyParam: Map<String,RequestBody> = hashMapOf()
+    var multiBodyParam: Map<String,AppRequestBody> = hashMapOf()
     var handleNetworkStatus : Boolean = true
 //    internal var errorModel : Class<out ErrorResponseModel>? = null
 //    internal var responseModel : Class<out ResponseModel>? = null

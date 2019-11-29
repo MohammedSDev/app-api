@@ -22,12 +22,13 @@ enum class AppMethod {
 }
 
 class AppRequest(
-    private val disposable: Disposable,
+    internal val disposable: Disposable,
     private val networkStatus: ((status: AppNetworkStatus) -> Unit)?
-) : Disposable {
-    override fun isDisposed() = disposable.isDisposed
+) {
 
-    override fun dispose() {
+    fun isDisposed() = disposable.isDisposed
+
+    fun dispose() {
         disposable.dispose()
     }
 
@@ -42,11 +43,11 @@ class AppRequest(
     }
 }
 
-class AppCompositeDisposable : Disposable, DisposableContainer {
+class AppCompositeDisposable {
     private val comD = CompositeDisposable()
     private val comDisKey = hashMapOf<String, AppRequest>()
 
-    override fun add(d: Disposable): Boolean {
+    fun add(d: Disposable): Boolean {
         return comD.add(d)
     }
 
@@ -63,7 +64,7 @@ class AppCompositeDisposable : Disposable, DisposableContainer {
             comDisKey[key]?.dispose()
         }
         comDisKey[key] = request
-        return comD.add(request)
+        return comD.add(request.disposable)
     }
 
     fun get(key: String): AppRequest? {
@@ -76,7 +77,7 @@ class AppCompositeDisposable : Disposable, DisposableContainer {
      * @param disposable the disposable to remove and dispose, not null
      * @return true if the operation was successful
      */
-    override fun remove(d: Disposable): Boolean {
+    fun remove(d: Disposable): Boolean {
         return comD.remove(d)
     }
 
@@ -88,11 +89,11 @@ class AppCompositeDisposable : Disposable, DisposableContainer {
      */
     @Synchronized
     fun remove(key: String): Boolean {
-        if (isDisposed)
+        if (isDisposed())
             return false
         val dis = comDisKey[key] ?: return false
         comDisKey.remove(key)
-        return comD.remove(dis)
+        return comD.remove(dis.disposable)
     }
 
     /**
@@ -106,21 +107,22 @@ class AppCompositeDisposable : Disposable, DisposableContainer {
         return remove(key)
     }
 
-    override fun delete(d: Disposable): Boolean {
-        if (d is AppRequest) {
-            if (comDisKey.containsValue(d)) {
-                comDisKey.keys.iterator().forEach {
-                    if (comDisKey.get(it)?.equals(d) == true) {
-                        comDisKey.remove(it)
-                        return@forEach
-                    }
+    fun delete(d: Disposable): Boolean {
+        val appRequet = comDisKey.filter { it.value.disposable == d }
+        if (appRequet.isNotEmpty() && appRequet.keys.first().isNotEmpty()) {
+            comDisKey.remove(appRequet.keys.first())
+            /*comDisKey.keys.iterator().forEach {
+                if (comDisKey.get(it)?.equals(d) == true) {
+                    comDisKey.remove(it)
+                    return@forEach
                 }
-            }
+            }*/
         }
+
         return comD.delete(d)
     }
 
-    override fun isDisposed(): Boolean {
+    fun isDisposed(): Boolean {
         return comD.isDisposed
     }
 
@@ -128,7 +130,7 @@ class AppCompositeDisposable : Disposable, DisposableContainer {
         dispose()
     }
 
-    override fun dispose() {
+     fun dispose() {
         comDisKey.clear()
         comD.dispose()
     }
@@ -139,7 +141,6 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
     private val method: AppMethod,
     private val appRequestParam: AppRequestParam
 ) {
-
 
 
     internal lateinit var errorModel: Class<E>
@@ -166,7 +167,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
         return this
     }
 
-    open fun onSuccess(block: (response: T, status: ((state: AppNetworkStatus) -> Unit)?) -> Unit): AppFunctions<T,E> {
+    open fun onSuccess(block: (response: T, status: ((state: AppNetworkStatus) -> Unit)?) -> Unit): AppFunctions<T, E> {
         onSuccessStatus = block
         return this
     }
@@ -188,7 +189,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
     }
 
 
-     fun call(): AppRequest {
+    fun call(): AppRequest {
 
 
         with(appRequestParam) {
@@ -216,7 +217,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                     AppMethod.POST -> {
                         apiService.postMultiPart(
                             url,
-                            multiBodyParam,
+                            multiBodyParam.map { Pair(it.key, it.value.requestBody) }.toMap(),
                             multiPFilesList,
                             queryParam,
                             headerParam
@@ -225,7 +226,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                     AppMethod.PUT -> {
                         apiService.putMultiPart(
                             url,
-                            multiBodyParam,
+                            multiBodyParam.map { Pair(it.key, it.value.requestBody) }.toMap(),
                             multiPFilesList,
                             queryParam,
                             headerParam
@@ -258,7 +259,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                 .delay(delay, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.computation())
                 .map {
-                    handleDataPacing2<T>(responseModel,errorModel, it)
+                    handleDataPacing2<T>(responseModel, errorModel, it)
                 }
             if (observeOnMainThread ?: Constants.OBSERVER_ON_MAIN_THREAD) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
@@ -268,13 +269,14 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                     networkStatus?.invoke(AppNetworkStatus.InProgress())
             }
                 .subscribe({
-                        onSuccessStatus?.invoke(it, networkStatus) ?: onSuccess?.invoke(it as T)
+                    onSuccessStatus?.invoke(it, networkStatus) ?: onSuccess?.invoke(it as T)
                     if (handleNetworkStatus)
                         networkStatus?.invoke(AppNetworkStatus.OnSuccess())
                 }, {
-                    onErrorStatus?.invoke(errorsHandling<E>(errorModel,it) , networkStatus) ?: onError?.invoke(
-                        errorsHandling(errorModel,it)
-                    )
+                    onErrorStatus?.invoke(errorsHandling<E>(errorModel, it), networkStatus)
+                        ?: onError?.invoke(
+                            errorsHandling(errorModel, it)
+                        )
                     if (handleNetworkStatus)
                         networkStatus?.invoke(AppNetworkStatus.OnError())
                 }, {})
@@ -296,7 +298,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
             if (handleNetworkStatus)
-                ob2 = ob2.doOnSubscribe{
+                ob2 = ob2.doOnSubscribe {
                     networkStatus?.invoke(AppNetworkStatus.InProgress())
                 }
             val dis = ob2.subscribe({
@@ -402,17 +404,18 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
 
 
 }
-fun tt(){
+
+fun tt() {
 
 }
 
-fun createRequestPart(value: String): RequestBody {
-    return RequestBody.create(
+fun createRequestPart(value: String): AppRequestBody {
+    return AppRequestBody.create(
         MultipartBody.FORM, value
     )
 }
 
-infix fun String.toRequest(value: String): RequestBody = createRequestPart(value)
+infix fun String.toRequest(value: String): AppRequestBody = createRequestPart(value)
 // url = file path or whatever suitable URL you want.
 fun getMimeType(url: String): String? {
     if (url.isEmpty()) return null
