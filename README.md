@@ -6,10 +6,10 @@ easy api hit  using customized retrofit
 
 
 
-# App-Api is an easy,flexible library for Android http calls based on Retrofit2. 
+# App-Api is an easy,flexible library for you Java/kotlin & Android  http calls based on Retrofit2. 
 you can use it for all your get, put, post, delete & download files via http/https calls in your android project,
 the main feature of this library is not prevent/limit you to use you own api service,adapters,or even OkHttpClient.Builder.
-this library build with love & kotlin.
+this library build with love & kotlin. with fully support to java.
 
 
 ### add dependence
@@ -33,7 +33,8 @@ dependencies {
 
 
 ### #How to Ues
-
+firt thing..all your response classes or just your main response class must extend from **ResponseModel** 
+& your error response class must extend from **ErrorResponseModel**
 
 ## AppConfig 
 `appConfig{ ... }` is function should called once before any other functions.. usuallly in *Application* class.
@@ -185,6 +186,36 @@ delete("repositories", MainResponse::class.java, MainErrorModel::class.java)
  },{error->
      //alertUser(error.errorMessage)
 })
+```
+# using Java 
+```java
+get("categories", CategoryRes.class, ErrorModel.class)
+.preRequest(new Function1<AppRequestParam, Unit>() {
+    @Override
+    public Unit invoke(AppRequestParam appRequestParam) {
+	HashMap<String, String> p = new HashMap<>();
+	p.put("locale","ar");
+	appRequestParam.setQueryParam(p);
+	//appRequestParam.setHeaderParam();
+	return null;
+    }
+})
+.onSuccess(new Function1<CategoryRes, Unit>() {
+    @Override
+    public Unit invoke(CategoryRes categoryRes) {
+	System.out.println(categoryRes.getMessage());
+	System.out.println(categoryRes.getCategories().get(0));
+	return null;
+    }
+})
+.onError(new Function1<ErrorModel, Unit>() {
+    @Override
+    public Unit invoke(ErrorModel errorModel) {
+	System.out.println("categories error, ${it.errorCode}, ${it.errorMessage}");
+	return null;
+    }
+})
+.call();
 ```
 
 # 
