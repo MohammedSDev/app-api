@@ -30,10 +30,10 @@ object Constants {
         internal  set
     var ADAPTERS:List<AppApiAdapterComponent> = listOf()
         internal  set
-    var errorModel : Class<out ErrorResponseModel> = ErrorResponseModel::class.java
-        internal  set
-    var customAppFunction : Class<out AppFunctions>? = null
-        internal  set
+//    var errorModel : Class<out ErrorResponseModel> = ErrorResponseModel::class.java
+//        internal  set
+//    var customAppFunction : Class<out AppFunctions<ResponseModel,ErrorResponseModel>>? = null
+//        internal  set
 
 
 

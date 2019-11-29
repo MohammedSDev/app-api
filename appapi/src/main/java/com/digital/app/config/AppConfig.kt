@@ -2,6 +2,7 @@ package com.digital.app.config
 
 import android.app.Application
 import com.digital.app.ErrorResponseModel
+import com.digital.app.ResponseModel
 import com.digital.app.api.AppFunctions
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -23,8 +24,8 @@ class AppConfig {
     var DEBUG_LEVEL: Int = DEBUG_LEVEL_BODY
     var OBSERVER_ON_MAIN_THREAD: Boolean = true
     var ADAPTERS: List<AppApiAdapterComponent> = listOf()
-    var errorModel : Class<out ErrorResponseModel> = Constants.errorModel
-    var customAppFunction: Class<out AppFunctions>? = null
+//    var errorModel : Class<out ErrorResponseModel> = Constants.errorModel
+//    var customAppFunction: Class<out AppFunctions<ResponseModel,ErrorResponseModel>>? = null
 
 
     var GENERAL_ERROR_MESSAGE = Constants.GENERAL_ERROR_MESSAGE
@@ -34,7 +35,7 @@ class AppConfig {
 
 }
 
-fun Application.appConfig(config: AppConfig.() -> Unit) {
+fun appConfig(config: AppConfig.() -> Unit) {
     val appConfig = AppConfig()
     config.invoke(appConfig)
     //updateConstants
@@ -48,8 +49,8 @@ fun Application.appConfig(config: AppConfig.() -> Unit) {
         WRITE_TIMEOUT = appConfig.WRITE_TIMEOUT
         OBSERVER_ON_MAIN_THREAD = appConfig.OBSERVER_ON_MAIN_THREAD
         ADAPTERS = appConfig.ADAPTERS
-        errorModel  = appConfig.errorModel
-        customAppFunction  = appConfig.customAppFunction
+//        errorModel  = appConfig.errorModel
+//        customAppFunction  = appConfig.customAppFunction
 
         DEBUG_LEVEL = when(appConfig.DEBUG_LEVEL){
             appConfig.DEBUG_LEVEL_NONE -> HttpLoggingInterceptor.Level.NONE

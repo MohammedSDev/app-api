@@ -3,77 +3,142 @@ package com.digital.app.api
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import com.digital.app.config.Constants
+import io.reactivex.internal.util.ErrorMode
 import java.io.File
 
-fun post(endPoint: String): AppFunctions {
+fun <T : ResponseModel, E : ErrorResponseModel> post(
+    endPoint: String,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+)
+        : AppFunctions<T, E> {
     val appReq = AppRequestParam(endPoint)
 
 
-    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
-        AppRequestParam::class.java)?.newInstance(
-        AppMethod.POST, appReq)
-        ?: AppFunctions(AppMethod.POST, appReq)
+//    return
+//    Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+//        AppRequestParam::class.java)?.newInstance(
+//        AppMethod.POST, appReq)
+//        ?:
+    return AppFunctions<T, E>(AppMethod.POST, appReq).also {
+        it.responseModel = responseModel
+        it.errorModel = errorMode
+    }
 }
 
-fun put(endPoint: String): AppFunctions {
+
+fun <T : ResponseModel, E : ErrorResponseModel> put(
+    endPoint: String,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+): AppFunctions<T, E> {
     val appReq = AppRequestParam(endPoint)
 
-    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
-        AppRequestParam::class.java)?.newInstance(
-        AppMethod.PUT, appReq)
-        ?: AppFunctions(AppMethod.PUT, appReq)
+//    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+//        AppRequestParam::class.java)?.newInstance(
+//        AppMethod.PUT, appReq)
+//        ?:
+    return AppFunctions<T, E>(AppMethod.PUT, appReq).also {
+        it.responseModel = responseModel
+        it.errorModel = errorMode
+    }
 
 
 }
 
-fun get(endPoint: String): AppFunctions {
+fun <T : ResponseModel, E : ErrorResponseModel> get(
+    endPoint: String,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+): AppFunctions<T, E> {
     val appReq = AppRequestParam(endPoint)
 
 
-    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
-        AppRequestParam::class.java)?.newInstance(
-        AppMethod.GET, appReq)
-        ?: AppFunctions(AppMethod.GET, appReq)
+//    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+//        AppRequestParam::class.java)?.newInstance(
+//        AppMethod.GET, appReq)
+//        ?:
+    return AppFunctions<T, E>(AppMethod.GET, appReq).also {
+        it.responseModel = responseModel
+        it.errorModel = errorMode
+    }
 }
 
-fun delete(endPoint: String): AppFunctions {
+fun <T : ResponseModel, E : ErrorResponseModel> delete(
+    endPoint: String,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+): AppFunctions<T, E> {
     val appReq = AppRequestParam(endPoint)
 
-    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
-        AppRequestParam::class.java)?.newInstance(
-        AppMethod.DELETE, appReq)
-        ?: AppFunctions(AppMethod.DELETE, appReq)
+//    return Constants.customAppFunction?.getConstructor(AppMethod::class.java,
+//        AppRequestParam::class.java)?.newInstance(
+//        AppMethod.DELETE, appReq)
+//        ?:
+    return AppFunctions<T, E>(AppMethod.DELETE, appReq).also {
+        it.responseModel = responseModel
+        it.errorModel = errorMode
+    }
 }
 
 
-inline fun <reified A : AppFunctions> post(): A {
+fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> post(
+    customAppFunction: Class<A>,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+): A {
     val appReq = AppRequestParam("")
 
 //    val instance = A::class.java.getDeclaredConstructor(A::class.java)
 //        .newInstance()
-    val instance2 = A::class.java.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
-        .newInstance(AppMethod.POST, appReq)
+    val instance2 =
+        customAppFunction.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
+            .newInstance(AppMethod.POST, appReq)
+    instance2.responseModel = responseModel
+    instance2.errorModel = errorMode
+
     return instance2
 }
 
-inline fun <reified A : AppFunctions> get(): A {
+fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> get(
+    customAppFunction: Class<A>,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+): A {
     val appReq = AppRequestParam("")
-    val instance2 = A::class.java.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
+    val instance2 = customAppFunction.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
         .newInstance(AppMethod.GET, appReq)
+    instance2.responseModel = responseModel
+    instance2.errorModel = errorMode
+
     return instance2
 }
 
-inline fun <reified A : AppFunctions> put(): A {
+fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> put(
+    customAppFunction: Class<A>,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+): A {
     val appReq = AppRequestParam("")
-    val instance2 = A::class.java.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
+    val instance2 = customAppFunction.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
         .newInstance(AppMethod.PUT, appReq)
+    instance2.responseModel = responseModel
+    instance2.errorModel = errorMode
+
     return instance2
 }
 
-inline fun <reified A : AppFunctions> delete(): A {
+fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> delete(
+    customAppFunction: Class<A>,
+    responseModel: Class<T>,
+    errorMode: Class<E>
+): A {
     val appReq = AppRequestParam("")
-    val instance2 = A::class.java.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
+    val instance2 = customAppFunction.getConstructor(AppMethod::class.java, AppRequestParam::class.java)
         .newInstance(AppMethod.DELETE, appReq)
+    instance2.responseModel = responseModel
+    instance2.errorModel = errorMode
+
     return instance2
 }
 
@@ -85,7 +150,7 @@ fun download(
     onError: (r: ErrorResponseModel) -> Unit
 ) {
 
-    AppFunctions(AppMethod.GET, appRequestParam)
+    AppFunctions<ResponseModel,ErrorResponseModel>(AppMethod.GET, appRequestParam)
         .onSuccess(onSuccess)
         .onError(onError)
         .download(file)

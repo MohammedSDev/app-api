@@ -8,15 +8,17 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import retrofit2.Response
 import java.lang.Exception
+import java.lang.IllegalArgumentException
 import java.net.UnknownHostException
 
 
-inline fun <reified T : ResponseModel>
-        handleDataPacing2(type: Class<out ErrorResponseModel>,response: retrofit2.Response<ResponseBody>): T {
+ fun < T : ResponseModel>
+        handleDataPacing2(responseType:Class<T>,type: Class<out ErrorResponseModel>,response: Response<ResponseBody>): T {
 
     if (response.isSuccessful) {
         //success response
-        val result = converter<T>(T::class.java,response.body())
+//        val result = converter<T>(T::class.java,response.body())
+        val result = converter<T>(responseType,response.body())
         if (result != null)
             return result
         else {
@@ -77,7 +79,7 @@ fun <T>converter(type:Class<T>,body: ResponseBody?): T? {
 
 }
 
-fun errorsHandling(throwable: Throwable): ErrorResponseModel {
+fun <E:ErrorResponseModel>errorsHandling(errorModel:Class<E>,throwable: Throwable): E {
     val error: ErrorResponseModel
     appApiLog(text = "errorsHandling, + ${throwable}")
     appApiLog(text = "errorsHandling,class simpleName + ${throwable.javaClass.simpleName}")
@@ -110,10 +112,30 @@ fun errorsHandling(throwable: Throwable): ErrorResponseModel {
                 "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
         appApiLog(text = text)
         error = ErrorResponseModel().apply {
+            errorCode = Constants.ERROR_RESPONSE_EMPTY_ERROR_CODE
             errorMessage = Constants.GENERAL_ERROR_MESSAGE
         }
     }
-    return error
+    if (errorModel == error.javaClass){
+        return error as E
+    }else{
+        try {
+            val errorObj = errorModel.getConstructor().newInstance()
+            errorObj.errorCode = error.errorCode
+            errorObj.errorMessage = error.errorMessage
+            return errorObj
+        } catch (e: Exception) {
+            //e.printStackTrace()
+            val errorMess = "-------------------Heads up ------------------" +
+                    "unExpected ErrorModel type. " +
+                    "cause: try generate errorModel of type ${errorModel.javaClass} " +
+                    "but ${e.javaClass} fired due to ${e.message} " +
+                    "---- this may happen when " +
+                    "${errorModel.javaClass} hove no empty constrictor, " +
+                    "or class is final."
+            throw IllegalArgumentException(errorMess,throwable)
+        }
+    }
 }
 
 fun appApiLog(text: String, tag: String = "appapi") {
