@@ -33,7 +33,7 @@ dependencies {
 
 
 ### #How to Ues
-firt thing..all your response classes or just your main response class must extend from **ResponseModel** 
+first thing..all your response classes or just your main response class must extend from **ResponseModel** 
 & your error response class must extend from **ErrorResponseModel**
 
 ## AppConfig 
@@ -52,8 +52,8 @@ appConfig {
 
 ```
 don't forgot to add you Application class to AndroidManifest file
-```
-...xml
+```xml
+...
 <application
             android:name=".MainApplication"
             android:icon="@mipmap/ic_launcher"
