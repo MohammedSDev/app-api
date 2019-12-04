@@ -27,7 +27,7 @@ allprojects {
 in app level `build.gradle`
 ```gradle
 dependencies {
-	        implementation 'com.github.MohammedSDev:app-api:1.0.6'
+	        implementation 'com.github.MohammedSDev:app-api:last-build'
 	}
 ```
 
