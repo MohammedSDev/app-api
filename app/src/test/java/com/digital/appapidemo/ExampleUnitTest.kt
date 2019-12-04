@@ -1,9 +1,6 @@
 package com.digital.appapidemo
 
-import com.digital.app.AppNetworkStatus
-import com.digital.app.ErrorResponseModel
-import com.digital.app.ResponseModel
-import com.digital.app.RetrofitObject
+import com.digital.app.*
 import com.digital.app.api.*
 import com.digital.app.config.AppApiAdapterComponent
 import com.digital.app.config.AppUploadableFile
@@ -438,6 +435,30 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun testDownload(){
+//        appConfig {
+//            BASE_URL = "http://www.goo.comg/"
+//        }
+
+        val file = File.createTempFile("pppp __  ","su kk")
+        println(file.name)
+        println(file.absolutePath)
+        println(file)
+//        val url = "https://download.quranicaudio.com/quran/abdulwadood_haneef/021.mp3"
+//        val url = "https://www.shell.com/energy-and-innovation/the-energy-future/scenarios/shell-scenario-sky/_jcr_content/pagePromo/image.img.960.jpeg/1548184031017/clear-blue-sky.jpeg"
+        val url = "https://cdn1.iconfinder.com/data/icons/internet-28/48/41-512.png"
+        download(file, AppRequestParam(url).also { it.observeOnMainThread = false },{
+            println("download success :)\nfile 👍 size:${file.length()}")
+        },{
+            println("download failed..:($it")
+            println("download failed..:(${it.errorMessage}")
+            println("download failed..:(${it.errorCode}")
+        })
+
+        Thread.sleep(90000)
+    }
+
+    @Test
     fun testHttpsCancel2() {
 
         val requests = AppCompositeDisposable()
@@ -497,6 +518,77 @@ class ExampleUnitTest {
         Thread.sleep(15000)
 
     }
+
+    fun testDownloadCopy(){
+
+        val file = File.createTempFile("prefix_name","suffix")
+        val fileUrl = "https://..."
+        val appRequest = AppRequestParam(fileUrl)
+        //appRequest.headerParam = ...
+        download(file, appRequest,{
+            //displayFileSize(file.length())
+            //..
+        },{error->
+            //alertUser(error.errorMessage)
+        })
+
+        Thread.sleep(90000)
+    }
+
+    /*@Test
+    fun testCopy() {
+
+
+        val yourParams = AppParamMap<String,Any>()
+//        val yourParams = HashMap<String,String>()
+        yourParams["your_key"] = listOf("value1","value2","value3")
+        yourParams["your_key"] = "your_value"
+        //..
+        //to override the BASE_URL, pass full url, e.g: https://bitbucket.org/...
+        val request = post("repositories", MainResponse::class.java, MainErrorModel::class.java)
+            .preRequest {
+                bodyParam = yourParams
+                queryParam = yourParams
+                headerParam = yourParams
+                this.delay = 2000
+
+            }
+            .onSuccess { response ->
+                //do stuff.
+                //e.g: setData(response)
+            }
+            .onError { error ->
+                //do stuff
+                //e.g: alertUser(error.errorMessage)
+            }
+
+            .onStatusChange {
+                val c = when (it) {
+                    is AppNetworkStatus.InProgress -> {
+                        //myLoader.start()
+                    }
+                    is AppNetworkStatus.OnSuccess -> {
+                        //myLoader.hide()
+                    }
+                    is AppNetworkStatus.OnError -> {
+                        //myLoader.error()
+                    }
+                    is AppNetworkStatus.OnCustom -> {
+                        //myLoader.stop()
+                    }
+                    is AppNetworkStatus.OnCancel -> {
+                        //myLoader.stop()
+                    }
+                }
+            }
+            .call()
+
+
+        //to cancel
+        //request.cancel()
+
+
+    }*/
 }
 
 @Test
