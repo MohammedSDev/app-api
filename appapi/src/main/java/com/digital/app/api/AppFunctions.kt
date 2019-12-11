@@ -51,15 +51,20 @@ class AppCompositeDisposable {
         return comD.add(d)
     }
 
+    fun add(key: String, d: Disposable, override: Boolean = true): Boolean {
+        return add(key, AppRequest(d, {}), override)
+    }
+
     /**
      * Adds a AppRequest to this container or cancel it if the
      * container has been disposed.
-     * @param request the AppRequest to add, not null
+     * @param request the AppRequest to add, if null,nothing will harping,and thus return false.
      * @param override if true,cancel the exist AppRequest with same key.
      * @return true if successful, false if this container has been disposed
      * @throws NullPointerException if {@code request} is null
      */
-    fun add(key: String, request: AppRequest, override: Boolean = true): Boolean {
+    fun add(key: String, request: AppRequest?, override: Boolean = true): Boolean {
+        request ?: return false
         if (override) {
             comDisKey[key]?.dispose()
         }
@@ -130,7 +135,7 @@ class AppCompositeDisposable {
         dispose()
     }
 
-     fun dispose() {
+    fun dispose() {
         comDisKey.clear()
         comD.dispose()
     }
@@ -269,16 +274,21 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                     networkStatus?.invoke(AppNetworkStatus.InProgress())
             }
                 .subscribe({
-                    onSuccessStatus?.invoke(it, networkStatus) ?: onSuccess?.invoke(it as T)
-                    if (handleNetworkStatus)
-                        networkStatus?.invoke(AppNetworkStatus.OnSuccess())
+                    if (handleNetworkStatus) {
+                        onSuccessStatus?.invoke(it, networkStatus) ?: onSuccess?.invoke(it as T)
+                        onSuccessStatus ?: networkStatus?.invoke(AppNetworkStatus.OnSuccess())
+                    } else {
+                        onSuccessStatus?.invoke(it, {}) ?: onSuccess?.invoke(it as T)
+                    }
                 }, {
-                    onErrorStatus?.invoke(errorsHandling<E>(errorModel, it), networkStatus)
-                        ?: onError?.invoke(
-                            errorsHandling(errorModel, it)
-                        )
-                    if (handleNetworkStatus)
-                        networkStatus?.invoke(AppNetworkStatus.OnError())
+                    if (handleNetworkStatus) {
+                        onErrorStatus?.invoke(errorsHandling<E>(errorModel, it), networkStatus)
+                            ?: onError?.invoke(errorsHandling(errorModel, it))
+                        onErrorStatus ?: networkStatus?.invoke(AppNetworkStatus.OnError())
+                    } else {
+                        onErrorStatus?.invoke(errorsHandling<E>(errorModel, it), {})
+                            ?: onError?.invoke(errorsHandling(errorModel, it))
+                    }
                 }, {})
             return AppRequest(dis, networkStatus)
         }
