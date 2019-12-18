@@ -1,9 +1,29 @@
 package com.digital.app
 
-sealed class AppNetworkStatus {
-    data class InProgress(val message:String? = null,var tag:Any? = null) : AppNetworkStatus()
-    data class OnSuccess(val message:String? = null,var tag:Any? = null) : AppNetworkStatus()
-    data class OnError(val message:String? = null,var tag:Any? = null) : AppNetworkStatus()
-    data class OnCancel(val message:String? = null,var tag:Any? = null) : AppNetworkStatus()
-    data class OnCustom(val key:Int = -1,val message:String? = null,var tag:Any? = null) : AppNetworkStatus()
+sealed class AppNetworkStatus(val message: String?, var tag: Any?) {
+    class InProgress(message: String? = null, tag: Any? = null) : AppNetworkStatus(message, tag)
+    class OnSuccess( message: String? = null,  tag: Any? = null) : AppNetworkStatus(
+        message,
+        tag
+    )
+
+     class OnError( message: String? = null,  tag: Any? = null) : AppNetworkStatus(
+        message,
+        tag
+    )
+
+     class OnCancel( message: String? = null,  tag: Any? = null) : AppNetworkStatus(
+        message,
+        tag
+    )
+
+     class OnCustom( key: Int = -1,  message: String? = null,  tag: Any? = null) :
+        AppNetworkStatus(
+            message,
+            tag
+        )
+
+
+//     message:String? = null
+//     tag:Any? = null
 }
