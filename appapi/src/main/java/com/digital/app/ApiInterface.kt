@@ -42,7 +42,7 @@ interface ApiInterface {
     @DELETE
     fun delete(
         @Url endPoint: String,
-        @Body body: Any,
+//        @Body body: Any,
         @QueryMap qParams: Map<String, @JvmSuppressWildcards Any> = mapOf(),
         @HeaderMap headerMap: Map<String, String> = mapOf()
     ): Observable<Response<ResponseBody>>

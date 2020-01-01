@@ -256,7 +256,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                         apiService.get(url, queryParam, headerParam)
                     }
                     AppMethod.DELETE -> {
-                        apiService.delete(url, bodyParam, queryParam, headerParam)
+                        apiService.delete(url, queryParam, headerParam)
                     }
                 }
             }
