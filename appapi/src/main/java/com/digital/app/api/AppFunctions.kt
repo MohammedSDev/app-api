@@ -425,7 +425,7 @@ fun createRequestPart(value: String): AppRequestBody {
     )
 }
 
-infix fun String.toRequest(value: String): AppRequestBody = createRequestPart(value)
+infix fun String.toRequest(value: String): Pair<String,AppRequestBody> = Pair(this,createRequestPart(value))
 // url = file path or whatever suitable URL you want.
 fun getMimeType(url: String): String? {
     if (url.isEmpty()) return null
