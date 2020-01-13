@@ -140,6 +140,10 @@ class AppCompositeDisposable {
         comD.dispose()
     }
 
+    fun contain(key:String):Boolean = comDisKey.containsKey(key)
+
+    val size get() = comD.size()
+
 }
 
 open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
