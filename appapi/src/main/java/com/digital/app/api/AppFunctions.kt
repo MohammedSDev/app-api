@@ -458,7 +458,7 @@ fun getMimeType(url: String): String? {
     val ins = BufferedInputStream(FileInputStream(file))
     val mimeType = URLConnection.guessContentTypeFromStream(ins)
 
-    if (mimeType.isNotEmpty())
+    if (mimeType?.isNotEmpty() == true)
         return mimeType
 
     var type: String? = null
