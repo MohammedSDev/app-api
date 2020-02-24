@@ -467,7 +467,7 @@ fun getMimeType(url: String): String? {
     if (extension != null) {
         type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase())
     } else {
-        type = "*/*"
+        //type = "*/*"
     }
     return type
 
