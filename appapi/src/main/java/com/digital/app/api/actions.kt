@@ -1,9 +1,9 @@
 package com.digital.app.api
 
+import com.digital.app.AppNetworkStatus
+import com.digital.app.DownloadModel
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
-import com.digital.app.config.Constants
-import io.reactivex.internal.util.ErrorMode
 import java.io.File
 
 fun <T : ResponseModel, E : ErrorResponseModel> post(
@@ -142,16 +142,35 @@ fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> delete(
     return instance2
 }
 
-
+/**
+ * download file
+ * @param file: destination file to download into it.
+ * @param isAsync: true to download in different thread.
+ * @param isLargeFile: true to try download file screamingly
+ *
+ * you can handle download process status in InProgress status.
+ * library passes nullable DownloadProcess? in tag key of InProgress Status.
+ *
+ * */
 fun download(
     file: File,
+    isAsync: Boolean,
     appRequestParam: AppRequestParam,
-    onSuccess: (r: ResponseModel) -> Unit,
-    onError: (r: ErrorResponseModel) -> Unit
+    isLargeFile: Boolean,
+    onSuccess: (r: DownloadModel) -> Unit,
+    onStatus: (s: AppNetworkStatus) -> Unit,
+    onError: (e: ErrorResponseModel) -> Unit
 ) {
 
-    AppFunctions<ResponseModel,ErrorResponseModel>(AppMethod.GET, appRequestParam)
+    AppFunctions<DownloadModel,ErrorResponseModel>(AppMethod.GET, appRequestParam).also {
+        it.responseModel = DownloadModel::class.java
+        it.errorModel = ErrorResponseModel::class.java
+    }.also {
+        it.isDownloadAsync = isAsync
+        it.isLargeFile = isLargeFile
+    }
         .onSuccess(onSuccess)
         .onError(onError)
+        .onStatusChange(onStatus)
         .download(file)
 }

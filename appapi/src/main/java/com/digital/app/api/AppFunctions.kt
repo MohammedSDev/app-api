@@ -4,10 +4,10 @@ import android.util.Base64
 import android.webkit.MimeTypeMap
 import com.digital.app.*
 import com.digital.app.config.Constants
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.internal.disposables.DisposableContainer
 import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -140,7 +140,7 @@ class AppCompositeDisposable {
         comD.dispose()
     }
 
-    fun contain(key:String):Boolean = comDisKey.containsKey(key)
+    fun contain(key: String): Boolean = comDisKey.containsKey(key)
 
     val size get() = comD.size()
 
@@ -151,6 +151,11 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
     private val appRequestParam: AppRequestParam
 ) {
 
+    /**
+     * download file in current thread
+     * */
+    internal var isDownloadAsync: Boolean = false
+    internal var isLargeFile: Boolean = false
 
     internal lateinit var errorModel: Class<E>
     internal lateinit var responseModel: Class<T>
@@ -304,10 +309,15 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
         with(appRequestParam) {
 
 
-            var ob2 = RetrofitObject.retrofit.downloadFileUrlSync(url, headerParam)
+            var ob2: Observable<ResponseBody> = (if (isLargeFile)
+                RetrofitObject.retrofit.downloadStreamingFileUrlSync(url, headerParam)
+            else
+                RetrofitObject.retrofit.downloadFileUrlSync(url, headerParam)
+                    )
                 .delay(delay, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.computation())
 
+            if (isDownloadAsync)
+                ob2 = ob2.subscribeOn(Schedulers.computation())
             if (observeOnMainThread ?: Constants.OBSERVER_ON_MAIN_THREAD) {
                 ob2 = ob2.observeOn(AndroidSchedulers.mainThread())
             }
@@ -320,7 +330,9 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                 writeResponseBodyToDisk(it, file)
                 if (handleNetworkStatus)
                     networkStatus?.invoke(AppNetworkStatus.OnSuccess())
-                val res = responseModel.getConstructor().newInstance()
+                val res = if (responseModel == DownloadModel::class.java)
+                    DownloadModel(file.absolutePath) as T
+                else responseModel.getConstructor().newInstance()
                 onSuccess?.invoke(res)
             }, { err ->
                 if (handleNetworkStatus)
@@ -363,7 +375,14 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
 
                     fileSizeDownloaded += read.toLong()
 
-//                    Log.d("mud", "file download: $fileSizeDownloaded of $fileSize")
+                    if (appRequestParam.handleNetworkStatus)
+                        networkStatus?.invoke(
+                            AppNetworkStatus.InProgress(
+                                null,
+                                DownloadProcess(fileSizeDownloaded / fileSize * 100, fileSize)
+                            )
+                        )
+//                    println("App-api,download: file download: $fileSizeDownloaded of $fileSize")
                 }
 
                 outputStream!!.flush()
@@ -429,7 +448,9 @@ fun createRequestPart(value: String): AppRequestBody {
     )
 }
 
-infix fun String.toRequest(value: String): Pair<String,AppRequestBody> = Pair(this,createRequestPart(value))
+infix fun String.toRequest(value: String): Pair<String, AppRequestBody> =
+    Pair(this, createRequestPart(value))
+
 // url = file path or whatever suitable URL you want.
 fun getMimeType(url: String): String? {
     if (url.isEmpty()) return null

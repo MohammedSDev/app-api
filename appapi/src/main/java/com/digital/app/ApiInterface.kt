@@ -76,4 +76,11 @@ interface ApiInterface {
         , @HeaderMap headerMap: Map<String, String> = mapOf()
     ): Observable<ResponseBody>
 
+    @GET
+    @Streaming
+    fun downloadStreamingFileUrlSync(
+        @Url fileUrl: String
+        , @HeaderMap headerMap: Map<String, String> = mapOf()
+    ): Observable<ResponseBody>
+
 }
