@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 @Keep
 open class ResponseModel{
-    var requestCode:Int = -1
+    var code:Int = -1
 }
 
 

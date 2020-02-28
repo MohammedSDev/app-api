@@ -12,42 +12,53 @@ import java.lang.IllegalArgumentException
 import java.net.UnknownHostException
 
 
- fun < T : ResponseModel>
-        handleDataPacing2(responseType:Class<T>,type: Class<out ErrorResponseModel>,response: Response<ResponseBody>): T {
+fun <T : ResponseModel>
+        handleDataPacing2(
+    responseType: Class<T>,
+    type: Class<out ErrorResponseModel>,
+    response: Response<ResponseBody>
+): T {
 
     if (response.isSuccessful) {
         //success response
 //        val result = converter<T>(T::class.java,response.body())
-        val result = converter<T>(responseType,response.body())
-        if (result != null)
+        val result = converter<T>(responseType, response.body())
+        if (result != null) {
+            result.code = response.code()
             return result
-        else {
+        } else {
             val text = "HeadsUp ..<>.............. new Error, body empty ................" +
                     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" +
                     "result: ${result}\n" +
                     "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
             appApiLog(text)
             val error = ErrorResponseModel().apply {
+                code = response.code()
                 errorCode = Constants.RESPONSE_EMPTY_ERROR_CODE
                 errorMessage = Constants.GENERAL_ERROR_MESSAGE
             }
             throw RetrofitThrowable(error, error.errorMessage)
         }
     } else {
-        throw failedResponseParcing2(type,response)
+        throw failedResponseParcing2(type, response)
 
     }
 }
 
-fun failedResponseParcing2(type:Class<out ErrorResponseModel>,response: Response<ResponseBody>): RetrofitThrowable {
+fun failedResponseParcing2(
+    type: Class<out ErrorResponseModel>,
+    response: Response<ResponseBody>
+): RetrofitThrowable {
     //failed response
-    val error = converter(type,response.errorBody())
+    val error = converter(type, response.errorBody())
 
     if (error != null) {
+        error.code = response.code()
         return RetrofitThrowable(error, error.errorMessage)
     } else {
         try {
             val errorObj = type.getConstructor().newInstance()
+            errorObj.code = response.code()
             errorObj.errorCode = Constants.ERROR_RESPONSE_EMPTY_ERROR_CODE
             errorObj.errorMessage = Constants.GENERAL_ERROR_MESSAGE
             return RetrofitThrowable(errorObj, errorObj.errorMessage)
@@ -56,6 +67,7 @@ fun failedResponseParcing2(type:Class<out ErrorResponseModel>,response: Response
         }
 
         val errorResponse = ErrorResponseModel().apply {
+            code = response.code()
             errorCode = Constants.ERROR_RESPONSE_EMPTY_ERROR_CODE
             errorMessage = Constants.GENERAL_ERROR_MESSAGE
         }
@@ -63,7 +75,7 @@ fun failedResponseParcing2(type:Class<out ErrorResponseModel>,response: Response
     }
 }
 
-fun <T>converter(type:Class<T>,body: ResponseBody?): T? {
+fun <T> converter(type: Class<T>, body: ResponseBody?): T? {
 
     if (body == null)
         return null
@@ -79,7 +91,7 @@ fun <T>converter(type:Class<T>,body: ResponseBody?): T? {
 
 }
 
-fun <E:ErrorResponseModel>errorsHandling(errorModel:Class<E>,throwable: Throwable): E {
+fun <E : ErrorResponseModel> errorsHandling(errorModel: Class<E>, throwable: Throwable): E {
     val error: ErrorResponseModel
     appApiLog(text = "errorsHandling, + ${throwable}")
     appApiLog(text = "errorsHandling,class simpleName + ${throwable.javaClass.simpleName}")
@@ -116,9 +128,9 @@ fun <E:ErrorResponseModel>errorsHandling(errorModel:Class<E>,throwable: Throwabl
             errorMessage = Constants.GENERAL_ERROR_MESSAGE
         }
     }
-    if (errorModel == error.javaClass){
+    if (errorModel == error.javaClass) {
         return error as E
-    }else{
+    } else {
         try {
             val errorObj = errorModel.getConstructor().newInstance()
             errorObj.errorCode = error.errorCode
@@ -133,7 +145,7 @@ fun <E:ErrorResponseModel>errorsHandling(errorModel:Class<E>,throwable: Throwabl
                     "---- this may happen when " +
                     "${errorModel.javaClass} hove no empty constrictor, " +
                     "or class is final."
-            throw IllegalArgumentException(errorMess,throwable)
+            throw IllegalArgumentException(errorMess, throwable)
         }
     }
 }
