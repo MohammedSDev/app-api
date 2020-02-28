@@ -2,7 +2,7 @@
 easy api hit  using customized retrofit
  
 
-![Release](https://jitpack.io/v/clickapps-android/app-api.svg)
+![Release](https://jitpack.io/v/MohammedSDev/app-api.svg)
 
 
 
@@ -27,7 +27,7 @@ allprojects {
 in app level `build.gradle`
 ```gradle
 dependencies {
-	        implementation 'com.github.clickapps-android:app-api:last-build'
+	        implementation 'com.github.MohammedSDev:app-api:last-build'
 	}
 ```
 
