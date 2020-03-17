@@ -2,9 +2,11 @@
 easy api hit  using customized retrofit
  
 
-![Release](https://jitpack.io/v/MohammedSDev/app-api.svg)
+![Release](https://jitpack.io/v/clickapps-android/app-api.svg)
 
-
+<!--
+MohammedSDev
+-->
 
 # App-Api is an easy,flexible library for you Java/kotlin & Android  http calls based on Retrofit2. 
 you can use it for all your get, put, post, delete & download files via http/https calls in your android project,
@@ -27,7 +29,7 @@ allprojects {
 in app level `build.gradle`
 ```gradle
 dependencies {
-	        implementation 'com.github.MohammedSDev:app-api:last-build'
+	        implementation 'com.github.clickapps-android:app-api:last-build'
 	}
 ```
 
