@@ -3,6 +3,7 @@ package com.digital.app
 import com.digital.app.config.Constants
 import com.google.gson.*
 import com.jisr.ess.http.ApiInterface
+import okhttp3.CertificatePinner
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
@@ -22,7 +23,7 @@ object RetrofitObject {
 
     init {
         Constants.OK_HTTP_CLIENT?.apply {
-            if(!Constants.OK_HTTP_CLIENT_KEEP_PURE) {
+            if (!Constants.OK_HTTP_CLIENT_KEEP_PURE) {
                 addInterceptor(logging)
                 connectTimeout(Constants.CONNECT_TIMEOUT, Constants.TIMEOUT_UNIT)
                 readTimeout(Constants.READ_TIMEOUT, Constants.TIMEOUT_UNIT)
@@ -44,18 +45,27 @@ object RetrofitObject {
         }
     }.create()
 
+    private val okhttpB = (Constants.OK_HTTP_CLIENT ?: httpClient)
+        .also {
+            if (Constants.CERTIFICATE_PINNER != null)
+                it.certificatePinner(Constants.CERTIFICATE_PINNER!!)
+        }
+
     private var retrofit_: Retrofit = Retrofit.Builder()
         .baseUrl(Constants.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create(customGson))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .client(Constants.OK_HTTP_CLIENT?.build() ?: httpClient.build())
+        .client(okhttpB.build())
         .build()
 
 
     fun <Z> getCustomRetrofit(customApiInterface: Class<Z>) = retrofit_.create(customApiInterface)
     val retrofit get() = retrofit_.create(ApiInterface::class.java)
 
-    fun <T> retrofitBodyConverter(type: Type, annotations: Array<Annotation?>): Converter<ResponseBody, T> {
+    fun <T> retrofitBodyConverter(
+        type: Type,
+        annotations: Array<Annotation?>
+    ): Converter<ResponseBody, T> {
         return retrofit_.responseBodyConverter<T>(type, annotations)
     }
 

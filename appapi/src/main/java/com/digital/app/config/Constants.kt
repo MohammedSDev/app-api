@@ -3,6 +3,7 @@ package com.digital.app.config
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import com.digital.app.api.AppFunctions
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -45,6 +46,8 @@ object Constants {
     const val RESPONSE_EMPTY_ERROR_CODE = 3032
     const val ERROR_RESPONSE_EMPTY_ERROR_CODE = 3033
 
+
+    internal var CERTIFICATE_PINNER:CertificatePinner? = null
 
     var GENERAL_ERROR_MESSAGE = "Some thing went wrong. try later"
         internal  set

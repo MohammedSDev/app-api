@@ -4,6 +4,7 @@ import android.app.Application
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import com.digital.app.api.AppFunctions
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
@@ -14,8 +15,8 @@ class AppConfig {
     val DEBUG_LEVEL_HEADERS = 2
     val DEBUG_LEVEL_BODY = 3
 
-    var OK_HTTP_CLIENT:OkHttpClient.Builder? = null
-    var OK_HTTP_CLIENT_KEEP_PURE:Boolean = Constants.OK_HTTP_CLIENT_KEEP_PURE
+    var OK_HTTP_CLIENT: OkHttpClient.Builder? = null
+    var OK_HTTP_CLIENT_KEEP_PURE: Boolean = Constants.OK_HTTP_CLIENT_KEEP_PURE
     var BASE_URL = ""
     var TIMEOUT_UNIT = TimeUnit.SECONDS
     var CONNECT_TIMEOUT: Long = 20//TimeUnit.SECONDS
@@ -32,6 +33,9 @@ class AppConfig {
     var CONNECT_ERROR_MESSAGE = Constants.CONNECT_ERROR_MESSAGE
     var CONNECT_TIME_OUT_ERROR_MESSAGE = Constants.CONNECT_TIME_OUT_ERROR_MESSAGE
     var CONNECT_ADDRESS_ERROR_MESSAGE = Constants.CONNECT_ADDRESS_ERROR_MESSAGE
+
+    var certificatePinner: CertificatePinner? = null
+
 
 }
 
@@ -52,10 +56,10 @@ fun appConfig(config: AppConfig.() -> Unit) {
 //        errorModel  = appConfig.errorModel
 //        customAppFunction  = appConfig.customAppFunction
 
-        DEBUG_LEVEL = when(appConfig.DEBUG_LEVEL){
+        DEBUG_LEVEL = when (appConfig.DEBUG_LEVEL) {
             appConfig.DEBUG_LEVEL_NONE -> HttpLoggingInterceptor.Level.NONE
             appConfig.DEBUG_LEVEL_BASIC -> HttpLoggingInterceptor.Level.BASIC
-            appConfig.DEBUG_LEVEL_HEADERS-> HttpLoggingInterceptor.Level.HEADERS
+            appConfig.DEBUG_LEVEL_HEADERS -> HttpLoggingInterceptor.Level.HEADERS
             appConfig.DEBUG_LEVEL_BODY -> HttpLoggingInterceptor.Level.BODY
             else -> HttpLoggingInterceptor.Level.BODY
         }
@@ -66,6 +70,8 @@ fun appConfig(config: AppConfig.() -> Unit) {
         CONNECT_TIME_OUT_ERROR_MESSAGE = appConfig.CONNECT_TIME_OUT_ERROR_MESSAGE
         CONNECT_ADDRESS_ERROR_MESSAGE = appConfig.CONNECT_ADDRESS_ERROR_MESSAGE
 
+
+        CERTIFICATE_PINNER = appConfig.certificatePinner
 
     }
 }
