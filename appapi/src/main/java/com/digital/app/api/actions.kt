@@ -4,7 +4,11 @@ import com.digital.app.AppNetworkStatus
 import com.digital.app.DownloadModel
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.internal.ws.WebSocketProtocol
 import java.io.File
+import javax.net.SocketFactory
 
 fun <T : ResponseModel, E : ErrorResponseModel> post(
     endPoint: String,
@@ -173,4 +177,17 @@ fun download(
         .onError(onError)
         .onStatusChange(onStatus)
         .download(file)
+}
+
+
+fun webSocket(){
+    val f = SocketFactory.getDefault()
+        Request.Builder()
+            .url("wss://echo.websocket.org")
+            .build()
+    OkHttpClient.Builder()
+        .socketFactory(f)
+        .build()
+        .newWebSocket()
+
 }
