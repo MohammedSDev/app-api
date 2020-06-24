@@ -6,6 +6,7 @@ import android.util.Base64
 import android.util.Log
 import com.digital.app.*
 import com.digital.app.api.*
+import com.digital.app.config.AppConfig
 import com.digital.app.config.AppUploadableFile
 import com.digital.app.config.Constants
 import kotlinx.android.synthetic.main.activity_main.*
@@ -24,6 +25,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
+
+
+        val ws = webSocket()
+
+        tv.setOnClickListener {
+            ws.connect()
+        }
+        tv2.setOnClickListener {
+            ws.send("Hello socket:${System.currentTimeMillis()}")
+        }
     }
 
 

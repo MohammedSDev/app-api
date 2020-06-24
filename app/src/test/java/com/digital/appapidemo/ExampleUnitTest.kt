@@ -27,12 +27,14 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
+        println(getMimeType(""))
+        println(getMimeType("") == null)
     }
 
     @Before
     fun appConfig() {
         appConfig {
-//            BASE_URL = "https://api.tuby.dev.clicksandbox.com/v1/mob/channels/"
+            //            BASE_URL = "https://api.tuby.dev.clicksandbox.com/v1/mob/channels/"
             BASE_URL = "http://api.dev.jisr.net/v2/"
             OBSERVER_ON_MAIN_THREAD = false
 
@@ -228,7 +230,8 @@ class ExampleUnitTest {
         post<MainResponse, MainErrorModel, CustomAppFun>(
             CustomAppFun::class.java,
             MainResponse::class.java,
-            MainErrorModel::class.java)
+            MainErrorModel::class.java
+        )
 
             .preRequest {
                 queryParam = p
@@ -238,11 +241,11 @@ class ExampleUnitTest {
             }
             .onSuccess { it ->
                 assertTrue(it is MainResponse)
-                assertEquals(MainResponse::javaClass,it.javaClass )
+                assertEquals(MainResponse::javaClass, it.javaClass)
 
             }
             .onError { it ->
-               if (it is MainErrorModel) {
+                if (it is MainErrorModel) {
                     println("onError. is main Error model")
 
                 } else {
@@ -253,7 +256,7 @@ class ExampleUnitTest {
                 println("onError server mes,${(it as MainErrorModel).error}")
                 assertTrue(it is MainErrorModel)
                 println("expected type " + MainErrorModel::javaClass)
-                println("actual type "+it::javaClass)
+                println("actual type " + it::javaClass)
 //                assertEquals(MainErrorModel::javaClass,it.javaClass )
 
             }
@@ -276,7 +279,8 @@ class ExampleUnitTest {
         post<MainResponse, MainErrorModel, CustomAppFun>(
             CustomAppFun::class.java,
             MainResponse::class.java,
-            MainErrorModel::class.java)
+            MainErrorModel::class.java
+        )
 
             .preRequest {
                 queryParam = p
@@ -293,7 +297,7 @@ class ExampleUnitTest {
             }
             .onError { it ->
                 assertTrue(it is MainErrorModel)
-                assertEquals(MainErrorModel::javaClass,it.javaClass )
+                assertEquals(MainErrorModel::javaClass, it.javaClass)
                 if (it is MainErrorModel) {
                     println("onError. is main Error model")
 
@@ -310,7 +314,7 @@ class ExampleUnitTest {
 
     }
 
-    private fun <T:ResponseModel, E:ErrorResponseModel, A : AppFunctions<T,E>> post2(
+    private fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> post2(
         response: Class<A>,
         error: Class<T>,
         appFunction: Class<E>
@@ -323,12 +327,16 @@ class ExampleUnitTest {
     fun testHttps() {
 
 
-        val url = "https://api.tuby.dev.clicksandbox.com/v1/mob/channels"
+        val url = "http://api.dressup.clicksandbox.com/v1/baskets/4"
 //        Constants.BASE_URL = "https://www.google.com/"
 //        Constants.OBSERVER_ON_MAIN_THREAD = false
 
-        val request = post(url, MainResponse::class.java, MainErrorModel::class.java)
-            .preRequest { observeOnMainThread = false }
+        val request = delete(url, MainResponse::class.java, MainErrorModel::class.java)
+            .preRequest {
+                observeOnMainThread = false
+                headerParam =
+                    mapOf("Authorization" to "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6NTEsIm1vYmlsZSI6IjUyNTQ3ODU0NiIsImxhc3RfbmFtZSI6IkRlbW8iLCJmaXJzdF9uYW1lIjoiRGVtbyIsImNvdW50cnlfY29kZSI6Ijk2NiIsImlhdCI6MTU3Nzg1NjMyMywiZXhwIjoxNTgwNDQ4MzIzfQ.tJnqmFrVekGHJXlyQJGIOJ75q_oHl9nPf8eCi4PCiFo")
+            }
             .onSuccess { it, status ->
                 status?.invoke(AppNetworkStatus.OnCustom(1))
                 println("\n\n\n\n\n------onSuccess-----\n\n\n\n\n")
@@ -435,25 +443,33 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testDownload(){
+    fun testDownload() {
 //        appConfig {
 //            BASE_URL = "http://www.goo.comg/"
 //        }
 
-        val file = File.createTempFile("pppp __  ","su kk")
+        val file = File.createTempFile("ppp3 __  ", "su kk")
         println(file.name)
         println(file.absolutePath)
         println(file)
-//        val url = "https://download.quranicaudio.com/quran/abdulwadood_haneef/021.mp3"
+        val url = "https://download.quranicaudio.com/quran/abdulwadood_haneef/001.mp3"
 //        val url = "https://www.shell.com/energy-and-innovation/the-energy-future/scenarios/shell-scenario-sky/_jcr_content/pagePromo/image.img.960.jpeg/1548184031017/clear-blue-sky.jpeg"
-        val url = "https://cdn1.iconfinder.com/data/icons/internet-28/48/41-512.png"
-        download(file, AppRequestParam(url).also { it.observeOnMainThread = false },{
-            println("download success :)\nfile 👍 size:${file.length()}")
-        },{
-            println("download failed..:($it")
-            println("download failed..:(${it.errorMessage}")
-            println("download failed..:(${it.errorCode}")
-        })
+//        val url = "https://cdn1.iconfinder.com/data/icons/internet-28/48/41-512.png"
+        download(file,
+//            downloadLargeFile(file,
+            false,
+            AppRequestParam(url).also { it.observeOnMainThread = false },
+            true,
+            {
+                println("download success :)\nfile 👍 path:${it.filePath}")
+                println("download success :)\nfile 👍 size:${File(it.filePath).length()}")
+            }, {
+                println("file  percentage:${(it.tag as DownloadProcess?)?.percentage}")
+                println("file  size:${(it.tag as DownloadProcess?)?.fileSize}")
+
+            }, {
+
+            })
 
         Thread.sleep(90000)
     }
@@ -512,27 +528,29 @@ class ExampleUnitTest {
             }
             .call()
 
-        requests.add(CHANNEL_API_REQUEST,request)
+        requests.add(CHANNEL_API_REQUEST, request)
         Thread.sleep(1000)
         requests.cancel(CHANNEL_API_REQUEST)
         Thread.sleep(15000)
 
     }
 
-    fun testDownloadCopy(){
+    fun testDownloadCopy() {
 
-        val file = File.createTempFile("prefix_name","suffix")
+        val file = File.createTempFile("prefix_name", "suffix")
         val fileUrl = "https://..."
         val appRequest = AppRequestParam(fileUrl)
         //appRequest.headerParam = ...
-        download(file, appRequest,{
-            //displayFileSize(file.length())
-            //..
-        },{error->
+        download(file, false,appRequest,false, {
+            //..done.
+        }, { status->
+            //displayFileSize(it.tag as DownloadProcess)
+
+        }, { error ->
             //alertUser(error.errorMessage)
         })
 
-        Thread.sleep(90000)
+        Thread.sleep(30000)
     }
 
     /*@Test
@@ -592,7 +610,7 @@ class ExampleUnitTest {
 }
 
 @Test
-fun testCase(){
+fun testCase() {
 //    val cz = AppApiAdapterComponent(String::class.java,TestDeseializeGson())
 ////    Constants.BASE_URL = "http://www.google.com"
 ////    Constants.ADAPTERS = listOf(cz)

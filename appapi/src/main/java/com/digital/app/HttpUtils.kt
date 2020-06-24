@@ -1,6 +1,7 @@
 package com.digital.app
 
 
+import android.util.Log
 import com.digital.app.config.Constants
 import okhttp3.ResponseBody
 import java.io.IOException
@@ -151,6 +152,6 @@ fun <E : ErrorResponseModel> errorsHandling(errorModel: Class<E>, throwable: Thr
 }
 
 fun appApiLog(text: String, tag: String = "appapi") {
-//    Log.d(tag,text)
-    println(text)
+    Log.d(tag,text)
+//    println(text)
 }
