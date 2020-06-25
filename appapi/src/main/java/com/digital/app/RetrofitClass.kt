@@ -418,35 +418,6 @@ internal class OnFailedCacheInterceptor : Interceptor {
 			throw x
 		}
 		if (!r.isSuccessful) {
-			if (f.exists()) {
-				val ins = FileInputStream(f)
-				val objs = ObjectInputStream(ins)
-				val j = objs.readObject()
-				objs.close()
-				if (j is ObjectWritable) {
-					val fileRes = Response.Builder()
-						.body(ResponseBody.create(MediaType.get(j.contentType), j.body))
-						.headers(Gson().fromJson<Headers>(j.header, Headers::class.java))
-						.message(j.mes)
-						.protocol(Protocol.valueOf(j.protocol))
-						.code(j.code)
-						.request(chain.request())
-						.build()
-
-
-					if (fileRes is Response) {
-						return fileRes
-					} else {
-						f.delete()
-					}
-
-
-				} else {
-					f.delete()
-					//an error occur
-				}
-			}
-
 			return r
 		}
 		val body = r.body() ?: return r
