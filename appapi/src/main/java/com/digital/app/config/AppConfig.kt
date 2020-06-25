@@ -1,12 +1,14 @@
 package com.digital.app.config
 
 import android.app.Application
+import android.content.Context
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import com.digital.app.api.AppFunctions
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 
 class AppConfig {
@@ -36,7 +38,24 @@ class AppConfig {
 
 	var certificatePinner: CertificatePinner? = null
 
+	var cashStrategy: Int = Constants.NONE_STRATEGY
+		private set
+	internal var weakContext: WeakReference<Context>? = null
+		private set
 
+	/**
+	 * set cache strategy
+	 *  Constants.NONE_STRATEGY, (Default)
+	 *  Constants.FORCE_STRATEGY,
+	 *  Constants.ON_FAILED_STRATEGY
+	 * */
+	fun setCashStrategy(strategy: Int, context: Context?) {
+		cashStrategy = strategy
+		if (context != null)
+			weakContext = WeakReference(context)
+		else
+			weakContext = null
+	}
 }
 
 fun appConfig(config: AppConfig.() -> Unit) {
@@ -72,6 +91,11 @@ fun appConfig(config: AppConfig.() -> Unit) {
 
 
 		CERTIFICATE_PINNER = appConfig.certificatePinner
+
+
+		CASH_STRATEGY = appConfig.cashStrategy
+		CONTEXT = appConfig.weakContext
+
 
 	}
 }
