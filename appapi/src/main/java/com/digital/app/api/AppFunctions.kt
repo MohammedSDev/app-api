@@ -426,7 +426,10 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
     }
 
 
-    //don't use this. use `getMimeType` fun.
+    /**
+     * don't use this. use `getMimeType` fun.
+     * */
+    @Deprecated("use `getMimeType` fun.")
     private fun getExtensionMimeType(path: String): String? {
         val extention = path.substring(path.lastIndexOf("."));
         val mimeTypeMap = MimeTypeMap.getFileExtensionFromUrl(extention)
@@ -438,9 +441,6 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
 
 }
 
-fun tt() {
-
-}
 
 fun createRequestPart(value: String): AppRequestBody {
     return AppRequestBody.create(
