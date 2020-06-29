@@ -79,6 +79,7 @@ class AppWSMessagingActions(private val messagingClient: AppMessagingActionsI) {
 
 	val isOpen get() = messagingClient.opened
 	val isClose get() = messagingClient.closed
+	val channels get() = messagingClient.channels
 
 
 	fun send(channel: String, data: Map<String, Any>) {
@@ -134,7 +135,7 @@ internal class AppWSClient(
 		private set
 	private var handcheckExt: Map<String, String> = emptyMap()
 	private val map: Map<String, String> = emptyMap()
-	private val channels = mutableSetOf<String>()
+	private val subscribeChannels = mutableSetOf<String>()
 
 	override fun onOpen(handshakedata: ServerHandshake?) {
 		appApiLog("onOpen,httpStatus:${handshakedata?.httpStatus}")
@@ -178,7 +179,7 @@ internal class AppWSClient(
 
 				val channel = json.getString("subscription")
 				val status = json.getBoolean("successful")
-				channels.add(channel)
+				subscribeChannels .add(channel)
 				listener?.onSubscribe(channel, status)
 
 			}
@@ -186,9 +187,14 @@ internal class AppWSClient(
 
 				val channel = json.getString("subscription")
 				val status = json.getBoolean("successful")
-				channels.remove(channel)
+				subscribeChannels .remove(channel)
 				listener?.onUnSubscribe(channel, status)
 
+			}
+			else ->{
+				val channel = runCatching { json.getString("subscription") }.getOrElse { "" }
+				val status = runCatching { json.getBoolean("successful") }.getOrElse { false}
+				listener?.onMessage(channel,status,message ?: "")
 			}
 		}
 
@@ -203,7 +209,8 @@ internal class AppWSClient(
 
 	override val opened: Boolean get() = isOpen
 	override val closed: Boolean get() = isClosed
-
+	override val channels: Set<String>
+		get() = subscribeChannels
 	override fun addHeaders(headers: Map<String, String>) {
 		headers.forEach {
 			addHeader(it.key, it.value)
@@ -403,6 +410,7 @@ interface AppMessagingEvents {
 	fun onDisConnect()
 	fun onSubscribe(channel: String, status: Boolean)
 	fun onUnSubscribe(channel: String, status: Boolean)
+	fun onMessage(channel: String, status: Boolean,text:String)
 	fun onError(ex: Exception?)
 }
 
@@ -410,6 +418,7 @@ interface AppMessagingActionsI {
 
 	val opened: Boolean
 	val closed: Boolean
+	val channels: Set<String>
 	fun connect(ext: Map<String, String>)
 	fun disConnect(ext: Map<String, String>)
 	fun subscribe(channel: String, ext: Map<String, Any>)
