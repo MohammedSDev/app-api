@@ -189,6 +189,66 @@ delete("repositories", MainResponse::class.java, MainErrorModel::class.java)
      //alertUser(error.errorMessage)
 })
 ```
+
+# webSocket 
+websocket using OkHttp
+```kotlin
+ val ws = webSocket("ws://<YOUR SERVER URL>",listener = object: WebSocketListener(){
+
+	override fun onOpen(webSocket: WebSocket, response: Response) {
+
+	}
+
+	override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+
+	}
+
+	override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+
+	}
+
+	override fun onMessage(webSocket: WebSocket, text: String) {
+
+	}
+
+	override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+
+	}
+
+	override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+
+	}
+})
+```
+#  Messaging puplish/subscribe (webSocket)
+```kotlin
+ws = webSocketMessaging(URI("ws://"), listener = object : AppMessagingEvents {
+	override fun onConnect() {
+	    ws.subscribe("/users/200")
+	}
+
+	override fun onMessage(channel: String, status: Boolean, text: String) {
+	    //TODO: do your stuff with  message data in `text` param 
+	}
+
+	override fun onDisConnect() {
+	    //alert user 
+	}
+
+	override fun onSubscribe(channel: String, status: Boolean) {
+		println("onSubscribe: $channel")
+	}
+
+	override fun onUnSubscribe(channel: String, status: Boolean) {
+		println("onUnSubscribe: $channel")
+
+	}
+
+	override fun onError(ex: Exception?) {
+		println("onError:${ex?.message}")
+	}
+})
+```
 # using Java 
 ```java
 import kotlin.Unit;
