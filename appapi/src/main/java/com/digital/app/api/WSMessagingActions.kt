@@ -79,6 +79,9 @@ class AppWSMessagingActions(private val messagingClient: AppMessagingActionsI) {
 
 	val isOpen get() = messagingClient.opened
 	val isClose get() = messagingClient.closed
+	/**
+	 * set of subscribed channels.
+	 * */
 	val channels get() = messagingClient.channels
 
 
