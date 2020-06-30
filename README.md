@@ -248,6 +248,15 @@ ws = webSocketMessaging(URI("ws://"), listener = object : AppMessagingEvents {
 		println("onError:${ex?.message}")
 	}
 })
+
+// start connection
+
+val param = mapOf(
+"token" to "...",
+"emp_id" to "..."
+)
+ws.connect(param)
+
 ```
 # using Java 
 ```java
