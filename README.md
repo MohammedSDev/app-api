@@ -2,7 +2,7 @@
 easy api hit  using customized retrofit
  
 
-![Release](https://jitpack.io/v/mobile-android-libraries/app-api.svg)
+![Release](https://jitpack.io/v/MohammedSDev/app-api.svg)
 
 <!--
 MohammedSDev
@@ -29,7 +29,7 @@ allprojects {
 in app level `build.gradle`
 ```gradle
 dependencies {
-	        implementation 'com.github.mobile-android-libraries:app-api:last-build'
+	        implementation 'com.github.MohammedSDev:app-api:last-build'
 	}
 ```
 
