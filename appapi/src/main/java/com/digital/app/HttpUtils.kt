@@ -13,7 +13,7 @@ import java.lang.IllegalArgumentException
 import java.net.UnknownHostException
 
 
-fun <T : ResponseModel>
+fun <T>
   handleDataPacing2(
   responseType: Class<T>,
   type: Class<out ErrorResponseModel>,
@@ -25,7 +25,8 @@ fun <T : ResponseModel>
 //        val result = converter<T>(T::class.java,response.body())
     val result = converter<T>(responseType, response.body())
     if (result != null) {
-      result.code = response.code()
+      if (result is ResponseModel)
+        result.code = response.code()
       return result
     } else {
       val text = "HeadsUp ..<>.............. new Error, body empty ................" +

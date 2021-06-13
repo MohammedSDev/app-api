@@ -146,7 +146,7 @@ class AppCompositeDisposable {
 
 }
 
-open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
+open class AppFunctions<T, E : ErrorResponseModel>(
     private val method: AppMethod,
     private val appRequestParam: AppRequestParam
 ) {
