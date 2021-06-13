@@ -43,6 +43,10 @@ class MainActivity : AppCompatActivity() {
 
 			}
 
+			override fun onMessage(channel: String, status: Boolean, text: String) {
+				println("onMessage: $channel")
+			}
+
 			override fun onError(ex: Exception?) {
 				println("onError:${ex?.message}")
 			}
