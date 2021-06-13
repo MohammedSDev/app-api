@@ -4,13 +4,21 @@ import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 
 @Keep
-open class ResponseModel{
-    var code:Int = -1
+interface ResponseModel {
+  var code: Int
 }
 
 
 data class DownloadModel(
-    val filePath:String
-):ResponseModel()
+  val filePath: String
 
-data class DownloadProcess(val percentage:Long,val fileSize:Long)
+) : ResponseModel {
+  private var c = 0
+  override var code: Int
+    get() = c
+    set(value) {
+      c = value
+    }
+}
+
+data class DownloadProcess(val percentage: Long, val fileSize: Long)

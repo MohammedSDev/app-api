@@ -339,7 +339,7 @@ open class AppFunctions<T : ResponseModel, E : ErrorResponseModel>(
                     networkStatus?.invoke(AppNetworkStatus.OnError())
                 val res = errorModel.getConstructor().newInstance()
 
-                res.errorMessage = err.message ?: err.localizedMessage
+                res.message = err.message ?: err.localizedMessage
 
                 onError?.invoke(res)
             }, {})

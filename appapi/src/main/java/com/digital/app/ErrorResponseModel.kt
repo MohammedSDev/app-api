@@ -1,6 +1,7 @@
 package com.digital.app
 
-open class ErrorResponseModel : ResponseModel(){
-    @Transient var errorMessage:String = ""
-    @Transient var errorCode:Int = -1
+
+interface ErrorResponseModel : ResponseModel {
+  var message: String
+  var throwable: Throwable?
 }
