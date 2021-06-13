@@ -3,7 +3,7 @@ package com.digital.app.api
 import com.digital.app.*
 import java.io.File
 
-fun <T, E : ErrorResponseModel> post(
+fun <T, E> post(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -24,7 +24,7 @@ fun <T, E : ErrorResponseModel> post(
 }
 
 
-fun <T, E : ErrorResponseModel> put(
+fun <T, E> put(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -43,7 +43,7 @@ fun <T, E : ErrorResponseModel> put(
 
 }
 
-fun <T, E : ErrorResponseModel> get(
+fun <T, E> get(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -61,7 +61,7 @@ fun <T, E : ErrorResponseModel> get(
 	}
 }
 
-fun <T, E : ErrorResponseModel> delete(
+fun <T, E> delete(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -79,7 +79,7 @@ fun <T, E : ErrorResponseModel> delete(
 }
 
 
-fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> post(
+fun <T, E, A : AppFunctions<T, E>> post(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -97,7 +97,7 @@ fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> post(
 	return instance2
 }
 
-fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> get(
+fun <T, E, A : AppFunctions<T, E>> get(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -112,7 +112,7 @@ fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> get(
 	return instance2
 }
 
-fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> put(
+fun <T, E, A : AppFunctions<T, E>> put(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -127,7 +127,7 @@ fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> put(
 	return instance2
 }
 
-fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> delete(
+fun <T, E, A : AppFunctions<T, E>> delete(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>

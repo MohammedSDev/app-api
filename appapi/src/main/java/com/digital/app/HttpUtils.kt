@@ -16,7 +16,7 @@ import java.net.UnknownHostException
 fun <T>
   handleDataPacing2(
   responseType: Class<T>,
-  type: Class<out ErrorResponseModel>,
+  type: Class<*>,
   response: Response<ResponseBody>
 ): T {
 
@@ -44,21 +44,30 @@ fun <T>
 }
 
 fun failedResponseParcing2(
-  type: Class<out ErrorResponseModel>,
+  type: Class<*>,
   response: Response<ResponseBody>
 ): RetrofitThrowable {
   //failed response
   val error = converter(type, response.errorBody())
 
   if (error != null) {
-    error.code = response.code()
-    return RetrofitThrowable(error, error.message)
+    return if (error is ErrorResponseModel) {
+      error.code = response.code()
+      RetrofitThrowable(error, error.message)
+    } else {
+      RetrofitThrowable(error, response.message())
+    }
   } else {
     try {
       val errorObj = type.getConstructor().newInstance()
-      errorObj.code = response.code()
-      errorObj.message = response.message()?.toString() ?: Constants.GENERAL_ERROR_MESSAGE
-      return RetrofitThrowable(errorObj, errorObj.message)
+      return if (errorObj is ErrorResponseModel) {
+        errorObj.code = response.code()
+        errorObj.message = response.message()?.toString() ?: Constants.GENERAL_ERROR_MESSAGE
+        RetrofitThrowable(errorObj, errorObj.message)
+      } else {
+        RetrofitThrowable(errorObj, response.message()?.toString() ?: Constants.GENERAL_ERROR_MESSAGE)
+      }
+
     } catch (e: Exception) {
       //e.printStackTrace()
     }
@@ -85,7 +94,7 @@ fun <T> converter(type: Class<T>, body: ResponseBody?): T? {
 
 }
 
-fun <E : ErrorResponseModel> errorsHandling(errorModel: Class<E>, throwable: Throwable): E {
+fun <E > errorsHandling(errorModel: Class<E>, throwable: Throwable): E {
   val error: ErrorResponseModel
   appApiLog(text = "errorsHandling, + ${throwable}")
   appApiLog(text = "errorsHandling,class simpleName + ${throwable.javaClass.simpleName}")
@@ -109,7 +118,7 @@ fun <E : ErrorResponseModel> errorsHandling(errorModel: Class<E>, throwable: Thr
       Constants.CONNECT_ADDRESS_ERROR_MESSAGE,
       throwable
     )
-  } else if (throwable is RetrofitThrowable)
+  } else if (throwable is RetrofitThrowable && throwable.error is ErrorResponseModel)
     error = throwable.error
   else {
     val text = "HeadsUp ................ new Error Not Handling................" +
@@ -127,8 +136,10 @@ fun <E : ErrorResponseModel> errorsHandling(errorModel: Class<E>, throwable: Thr
   } else {
     try {
       val errorObj = errorModel.getConstructor().newInstance()
-      errorObj.code = error.code
-      errorObj.message = error.message
+      if(errorObj is ErrorResponseModel) {
+        errorObj.code = error.code
+        errorObj.message = error.message
+      }
       return errorObj
     } catch (e: Exception) {
       //e.printStackTrace()
