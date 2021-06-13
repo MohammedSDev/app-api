@@ -1,22 +1,9 @@
 package com.digital.app.api
 
 import com.digital.app.*
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import okhttp3.*
-import okhttp3.internal.ws.WebSocketProtocol
-import okio.ByteString
-import org.java_websocket.client.WebSocketClient
-import org.java_websocket.handshake.ServerHandshake
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
-import java.lang.Exception
-import java.net.URI
-import javax.net.SocketFactory
 
-fun <T : ResponseModel, E : ErrorResponseModel> post(
+fun <T, E : ErrorResponseModel> post(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -37,7 +24,7 @@ fun <T : ResponseModel, E : ErrorResponseModel> post(
 }
 
 
-fun <T : ResponseModel, E : ErrorResponseModel> put(
+fun <T, E : ErrorResponseModel> put(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -56,7 +43,7 @@ fun <T : ResponseModel, E : ErrorResponseModel> put(
 
 }
 
-fun <T : ResponseModel, E : ErrorResponseModel> get(
+fun <T, E : ErrorResponseModel> get(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -74,7 +61,7 @@ fun <T : ResponseModel, E : ErrorResponseModel> get(
 	}
 }
 
-fun <T : ResponseModel, E : ErrorResponseModel> delete(
+fun <T, E : ErrorResponseModel> delete(
 	endPoint: String,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -92,7 +79,7 @@ fun <T : ResponseModel, E : ErrorResponseModel> delete(
 }
 
 
-fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> post(
+fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> post(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -110,7 +97,7 @@ fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> post(
 	return instance2
 }
 
-fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> get(
+fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> get(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -125,7 +112,7 @@ fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> get(
 	return instance2
 }
 
-fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> put(
+fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> put(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>
@@ -140,7 +127,7 @@ fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> put(
 	return instance2
 }
 
-fun <T : ResponseModel, E : ErrorResponseModel, A : AppFunctions<T, E>> delete(
+fun <T, E : ErrorResponseModel, A : AppFunctions<T, E>> delete(
 	customAppFunction: Class<A>,
 	responseModel: Class<T>,
 	errorMode: Class<E>
