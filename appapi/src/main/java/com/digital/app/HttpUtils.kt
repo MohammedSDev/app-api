@@ -4,6 +4,7 @@ package com.digital.app
 import android.util.Log
 import com.digital.app.config.Constants
 import okhttp3.ResponseBody
+import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
@@ -34,7 +35,11 @@ fun <T>
         "result: ${result}\n" +
         "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
       appApiLog(text)
-      val error = create(Constants.RESPONSE_EMPTY_ERROR_CODE, Constants.GENERAL_ERROR_MESSAGE, null)
+      val error = create(
+        Constants.RESPONSE_EMPTY_ERROR_CODE,
+        Constants.GENERAL_ERROR_MESSAGE,
+        IllegalStateException("response parsed is null,code: ${response.code()}")
+      )
       throw RetrofitThrowable(error, error.message)
     }
   } else {
@@ -63,18 +68,21 @@ fun failedResponseParcing2(
       return if (errorObj is ErrorResponseModel) {
         errorObj.code = response.code()
         errorObj.message = response.message()?.toString() ?: Constants.GENERAL_ERROR_MESSAGE
+        errorObj.throwable =
+          IllegalStateException("failure response parsed is null,code: ${response.code()}")
         RetrofitThrowable(errorObj, errorObj.message)
       } else {
-        RetrofitThrowable(errorObj, response.message()?.toString() ?: Constants.GENERAL_ERROR_MESSAGE)
+        RetrofitThrowable(
+          errorObj,
+          response.message()?.toString() ?: Constants.GENERAL_ERROR_MESSAGE
+        )
       }
 
     } catch (e: Exception) {
-      //e.printStackTrace()
+      appApiLog(e)
+      val errorResponse = create(response.code(), Constants.GENERAL_ERROR_MESSAGE, e)
+      return RetrofitThrowable(errorResponse, errorResponse.message)
     }
-
-    val errorResponse = create(response.code(), Constants.GENERAL_ERROR_MESSAGE, null)
-
-    return RetrofitThrowable(errorResponse, errorResponse.message)
   }
 }
 
@@ -94,7 +102,7 @@ fun <T> converter(type: Class<T>, body: ResponseBody?): T? {
 
 }
 
-fun <E > errorsHandling(errorModel: Class<E>, throwable: Throwable): E {
+fun <E> errorsHandling(errorModel: Class<E>, throwable: Throwable): E {
   val error: ErrorResponseModel
   appApiLog(text = "errorsHandling, + ${throwable}")
   appApiLog(text = "errorsHandling,class simpleName + ${throwable.javaClass.simpleName}")
@@ -136,9 +144,10 @@ fun <E > errorsHandling(errorModel: Class<E>, throwable: Throwable): E {
   } else {
     try {
       val errorObj = errorModel.getConstructor().newInstance()
-      if(errorObj is ErrorResponseModel) {
+      if (errorObj is ErrorResponseModel) {
         errorObj.code = error.code
         errorObj.message = error.message
+        errorObj.throwable = error.throwable
       }
       return errorObj
     } catch (e: Exception) {
@@ -155,9 +164,16 @@ fun <E > errorsHandling(errorModel: Class<E>, throwable: Throwable): E {
   }
 }
 
-fun appApiLog(text: String, tag: String = "appapi") {
-  Log.d(tag, text)
+fun appApiLog(text: String?, tag: String = "appapi") {
+  text ?: return
+  if (Constants.DEBUG_LEVEL != HttpLoggingInterceptor.Level.NONE)
+    Log.d(tag, text)
 //    println(text)
+}
+
+fun appApiLog(exception: Exception) {
+  if (Constants.DEBUG_LEVEL != HttpLoggingInterceptor.Level.NONE)
+    exception.printStackTrace()
 }
 
 
