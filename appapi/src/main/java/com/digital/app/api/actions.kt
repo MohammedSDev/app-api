@@ -162,9 +162,9 @@ fun download(
 	onError: (e: ErrorResponseModel) -> Unit
 ) {
 
-	AppFunctions<DownloadModel, ErrorResponseModel>(AppMethod.GET, appRequestParam).also {
+	AppFunctions<DownloadModel, DownloadError>(AppMethod.GET, appRequestParam).also {
 		it.responseModel = DownloadModel::class.java
-		it.errorModel = ErrorResponseModel::class.java
+		it.errorModel = DownloadError::class.java
 	}.also {
 		it.isDownloadAsync = isAsync
 		it.isLargeFile = isLargeFile

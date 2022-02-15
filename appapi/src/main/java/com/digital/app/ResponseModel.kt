@@ -21,4 +21,9 @@ data class DownloadModel(
     }
 }
 
+data class DownloadError(
+  override var message: String,
+  override var throwable: Throwable?,
+  override var code: Int
+):ErrorResponseModel
 data class DownloadProcess(val percentage: Long, val fileSize: Long)
