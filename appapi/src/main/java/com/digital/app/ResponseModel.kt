@@ -25,5 +25,8 @@ data class DownloadError(
   override var message: String,
   override var throwable: Throwable?,
   override var code: Int
-):ErrorResponseModel
+):ErrorResponseModel{
+  constructor():this("",null,-1)
+
+}
 data class DownloadProcess(val percentage: Long, val fileSize: Long)
