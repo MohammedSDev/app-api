@@ -15,7 +15,7 @@ import java.nio.file.Files
 class AppRequestParam(var url: String){
     var headerParam: Map<String,String> = hashMapOf()
     var queryParam: Map<String,Any> = hashMapOf()
-    var bodyParam: Map<String,Any> = hashMapOf()
+    var bodyParam: Map<String,Any?> = hashMapOf()
     var delay: Long = 0//ms
     var observeOnMainThread: Boolean? = null
     var isMultiPart: Boolean = false
