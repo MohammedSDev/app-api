@@ -43,10 +43,12 @@ object RetrofitObject {
 		.writeTimeout(Constants.WRITE_TIMEOUT, Constants.TIMEOUT_UNIT)
 	// add custom gson
 //    private val type = object :TypeToken<List<RequestModel>?>(){}.type
-	private val customGson = GsonBuilder().apply {
-		Constants.ADAPTERS.forEach { item ->
-			registerTypeAdapter(item.type, item.adapter)
-		}
+  private val customGson = (Constants.CUSTOM_GSON_CONVERTER ?: GsonBuilder()).apply {
+		if (Constants.CUSTOM_GSON_CONVERTER == null || !Constants.CUSTOM_GSON_CONVERTER_KEEP_PURE) {
+      Constants.ADAPTERS.forEach { item ->
+        registerTypeAdapter(item.type, item.adapter)
+      }
+    }
 	}.create()
 
 	private val okhttpB = (Constants.OK_HTTP_CLIENT ?: httpClient)

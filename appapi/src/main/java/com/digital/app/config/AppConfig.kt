@@ -5,6 +5,7 @@ import android.content.Context
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import com.digital.app.api.AppFunctions
+import com.google.gson.GsonBuilder
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -19,6 +20,8 @@ class AppConfig {
 
 	var OK_HTTP_CLIENT: OkHttpClient.Builder? = null
 	var OK_HTTP_CLIENT_KEEP_PURE: Boolean = Constants.OK_HTTP_CLIENT_KEEP_PURE
+	var CUSTOM_GSON_CONVERTER: GsonBuilder? = null
+	var CUSTOM_GSON_CONVERTER_KEEP_PURE: Boolean = Constants.CUSTOM_GSON_CONVERTER_KEEP_PURE
 	var BASE_URL = ""
 	var TIMEOUT_UNIT = TimeUnit.SECONDS
 	var CONNECT_TIMEOUT: Long = 20//TimeUnit.SECONDS
@@ -65,6 +68,8 @@ fun appConfig(config: AppConfig.() -> Unit) {
 	Constants.apply {
 		OK_HTTP_CLIENT = appConfig.OK_HTTP_CLIENT
 		OK_HTTP_CLIENT_KEEP_PURE = appConfig.OK_HTTP_CLIENT_KEEP_PURE
+		CUSTOM_GSON_CONVERTER = appConfig.CUSTOM_GSON_CONVERTER
+		CUSTOM_GSON_CONVERTER_KEEP_PURE = appConfig.CUSTOM_GSON_CONVERTER_KEEP_PURE
 		BASE_URL = appConfig.BASE_URL
 		TIMEOUT_UNIT = appConfig.TIMEOUT_UNIT
 		CONNECT_TIMEOUT = appConfig.CONNECT_TIMEOUT

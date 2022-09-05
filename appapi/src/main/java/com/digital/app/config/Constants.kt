@@ -4,6 +4,7 @@ import android.content.Context
 import com.digital.app.ErrorResponseModel
 import com.digital.app.ResponseModel
 import com.digital.app.api.AppFunctions
+import com.google.gson.GsonBuilder
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,6 +17,10 @@ object Constants {
 	var OK_HTTP_CLIENT: OkHttpClient.Builder? = null
 		internal set
 	var OK_HTTP_CLIENT_KEEP_PURE: Boolean = false
+		internal set
+	var CUSTOM_GSON_CONVERTER: GsonBuilder? = null
+		internal set
+	var CUSTOM_GSON_CONVERTER_KEEP_PURE: Boolean = false
 		internal set
 	var BASE_URL = ""
 		internal set
